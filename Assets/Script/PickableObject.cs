@@ -4,6 +4,8 @@ public class PickableObject : MonoBehaviour, IPickable
 {
     private bool isPickedUp = false;
     private Camera mainCamera;
+    
+    public bool isReadyToBeClickable = false;
 
     void Start()
     {
@@ -72,6 +74,7 @@ public class PickableObject : MonoBehaviour, IPickable
                 {
                     Debug.Log("Ingredient placed successfully on the station.");
                     OnDrop(); // Libère l'objet une fois placé
+                    isReadyToBeClickable = true; // Set this to true after a successful drop
                     return; // Quitte la fonction car l'objet a été déposé correctement
                 }
                 else

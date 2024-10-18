@@ -22,15 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36b721d7ac8d662419f0b027bb0d47d8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.0090003
+      value: -0.127
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36b721d7ac8d662419f0b027bb0d47d8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.017
+      value: 0.112
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36b721d7ac8d662419f0b027bb0d47d8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0079996
+      value: 0.018
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 36b721d7ac8d662419f0b027bb0d47d8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -99,7 +99,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ObjectState1: {fileID: 4394217469417667243}
-  ObjectState2: {fileID: 7209177016255576304, guid: 3098c48165048904896dcd66a1ff39fd, type: 3}
+  ObjectState2Prefab: {fileID: 7209177016255576304, guid: 3098c48165048904896dcd66a1ff39fd, type: 3}
+  pickableObject: {fileID: 1089580356162208525}
 --- !u!114 &7232063514482991333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,3 +187,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb3061cf5d80427786e75928b083ef57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isReadyToBeClickable: 0
