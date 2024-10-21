@@ -34,7 +34,7 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
             // Instantiate the slider only when it's ready to be sliced
             if (sliderInstance == null)
             {
-                Vector3 sliderPosition = ObjectState1.transform.position + Vector3.up * 1.5f;
+                Vector3 sliderPosition = ObjectState1.transform.position;
                 sliderInstance = Instantiate(sliderPrefab, sliderPosition, Quaternion.identity, transform);
                 slider = sliderInstance.GetComponentInChildren<Slider>();
                 Debug.Log("Slider instantiated! "+ slider);
