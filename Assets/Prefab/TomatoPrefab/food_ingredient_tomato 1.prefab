@@ -30,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1088444659871909439}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.98768, y: 0.11996968, z: -0.027291622, w: 0.0966986}
-  m_LocalPosition: {x: -5.81, y: -8.93, z: -4.23}
+  m_LocalRotation: {x: 0.9960593, y: -0.07627014, z: 0.045252148, w: -0.0010206457}
+  m_LocalPosition: {x: -5.8198247, y: -8.789063, z: -4.218015}
   m_LocalScale: {x: 212.67998, y: 212.67998, z: 212.67998}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -169.37, y: -4.5, z: 14.27}
+  m_LocalEulerAnglesHint: {x: -180.279, y: -365.181, z: 8.744995}
 --- !u!33 &3746684412724073248
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -101,7 +101,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ObjectState1: {fileID: 1088444659871909439}
   ObjectState2Prefab: {fileID: 3741537667912801475, guid: 90615286548f7cd4c8a3880601da8b03, type: 3}
-  sliceProgress: 4
+  sliderPrefab: {fileID: 268588992785950037, guid: df9c8c865a29b47d28c1db0e20b0c15d, type: 3}
+  sliceProgress: 5
   pickableObject: {fileID: 3192120803467326570}
 --- !u!114 &3192120803467326570
 MonoBehaviour:
