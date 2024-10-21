@@ -101,6 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ObjectState1: {fileID: 1088444659871909439}
   ObjectState2Prefab: {fileID: 3741537667912801475, guid: 90615286548f7cd4c8a3880601da8b03, type: 3}
+  sliceProgress: 4
   pickableObject: {fileID: 3192120803467326570}
 --- !u!114 &3192120803467326570
 MonoBehaviour:

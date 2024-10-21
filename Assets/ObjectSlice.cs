@@ -1,13 +1,17 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class ObjectSlice : MonoBehaviour, IPointerClickHandler
 {
     public GameObject ObjectState1;
-    public GameObject ObjectState2Prefab; // Prefab for the second state
+    public GameObject ObjectState2Prefab;
+    
+    public int sliceProgress = 0; 
 
-    private GameObject instantiatedObjectState2; // To hold the instantiated second state
+    private GameObject instantiatedObjectState2;
     private int sliceState = 0;
+    private int counterSlice = 0;
     
     public PickableObject pickableObject;
 
@@ -15,7 +19,6 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
     {
         Debug.Log("CarrotSlice script attached to: " + name);
         ObjectState1.SetActive(true);
-        
     }
 
     public void isClicked()
@@ -26,9 +29,10 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
     // This method will detect a click or tap
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Check if the object is ready to be sliced
         if (pickableObject.isReadyToBeClickable)
         {
+            IncrementCounterSlice();
+            if (!IsReadyToSlice()) return;
             Debug.Log(name + " Game Object Clicked and is ready to slice!");
             SliceObject();
         }
@@ -38,13 +42,22 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    private void IncrementCounterSlice()
+    {
+        counterSlice += 1;
+        Debug.Log("Object Clicked! CounterSlice: " + counterSlice);
+    }
+
+    private bool IsReadyToSlice()
+    {
+        return counterSlice == sliceProgress;
+    }
+
     void SliceObject()
     {
         if (sliceState == 0)
         {
-            // Instantiate ObjectState2 at the same position, rotation, and scale as ObjectState1
             instantiatedObjectState2 = Instantiate(ObjectState2Prefab, ObjectState1.transform.position, ObjectState1.transform.rotation);
-            //instantiatedObjectState2.transform.localScale = ObjectState1.transform.localScale;
 
             // Disable the first state
             ObjectState1.SetActive(false);
