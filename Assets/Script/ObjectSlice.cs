@@ -27,7 +27,7 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         // Check if the object is ready to be sliced
-        if (pickableObject.isReadyToBeClickable)
+        if (true)
         {
             Debug.Log(name + " Game Object Clicked and is ready to slice!");
             SliceObject();

@@ -1,6 +1,6 @@
 ﻿namespace Script.Ingredients
 {
-    public class Tomato: PickableObject, ICuttable
+    public class Tomato: PickableObject
     {
         public void Cut()
         {
