@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1448490942833731562}
   - component: {fileID: 5526107927497037460}
   - component: {fileID: 3192120803467326570}
+  - component: {fileID: 5524560096256505368}
   m_Layer: 0
   m_Name: food_ingredient_tomato 1
   m_TagString: Untagged
@@ -112,4 +113,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bbb5a68cfda46db8a1365f214522a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isReadyToBeClickable: 0
+--- !u!65 &5524560096256505368
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088444659871909439}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.0075000017, y: 0.0074999994, z: 0.007}
+  m_Center: {x: -6.5192296e-12, y: -6.426144e-11, z: 0.0034999857}

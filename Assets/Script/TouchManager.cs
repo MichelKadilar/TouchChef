@@ -6,6 +6,7 @@ public class TouchManager : MonoBehaviour
     private Camera mainCamera;
     private TouchInputActions touchActions;
     private bool isPressed = false;
+    private int currentTouchId = 0;
 
     private void Awake()
     {
@@ -17,8 +18,7 @@ public class TouchManager : MonoBehaviour
         }
 
         touchActions = new TouchInputActions();
-
-        // Vérification des actions
+        
         Debug.Log("TouchManager: Setting up input actions");
         
         touchActions.Touch.PrimaryTouch.started += ctx => {
@@ -30,40 +30,56 @@ public class TouchManager : MonoBehaviour
             Debug.Log("TouchManager: PrimaryTouch.canceled triggered");
             OnTouchEnded();
         };
+
+        touchActions.Touch.PrimaryTouchPosition.performed += ctx => {
+            if (isPressed)
+            {
+                Vector2 position = ctx.ReadValue<Vector2>();
+                UpdateObjectPosition(position);
+            }
+        };
     }
 
     private void OnEnable()
     {
         Debug.Log("TouchManager: OnEnable - Enabling touch actions");
         touchActions.Enable();
-        
-        // Vérification que les actions sont bien activées
         Debug.Log($"TouchManager: Actions enabled: {touchActions.Touch.enabled}");
     }
 
     private void OnDisable()
     {
-        Debug.Log("TouchManager: OnDisable - Disabling touch actions");
         touchActions.Disable();
     }
 
     private void OnTouchStarted()
     {
-        Debug.Log("TouchManager: OnTouchStarted called");
         isPressed = true;
         Vector2 position = touchActions.Touch.PrimaryTouchPosition.ReadValue<Vector2>();
-        Debug.Log($"TouchManager: Touch position: {position}");
-        HandleTouchBegan(0, position);
+        Debug.Log($"TouchManager: Touch Started at position: {position}");
+        HandleTouchBegan(currentTouchId, position);
     }
 
     private void OnTouchEnded()
     {
-        Debug.Log("TouchManager: OnTouchEnded called");
         if (isPressed)
         {
             isPressed = false;
             Vector2 position = touchActions.Touch.PrimaryTouchPosition.ReadValue<Vector2>();
-            HandleTouchEnded(0, position);
+            HandleTouchEnded(currentTouchId, position);
+        }
+    }
+
+    private void UpdateObjectPosition(Vector2 screenPosition)
+    {
+        Vector3 worldPosition = GetWorldPosition(screenPosition);
+        
+        foreach (var pickable in FindObjectsOfType<PickableObject>())
+        {
+            if (pickable.CurrentTouchId == currentTouchId)
+            {
+                pickable.OnTouchMove(currentTouchId, worldPosition);
+            }
         }
     }
 
@@ -73,44 +89,21 @@ public class TouchManager : MonoBehaviour
         Ray ray = mainCamera.ScreenPointToRay(position);
         Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red, 1f);
         
-        int layerMask = -1; // Tous les layers
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Debug.Log($"TouchManager: Raycast hit object: {hit.collider.gameObject.name} at position {hit.point}");
+            Debug.Log($"TouchManager: Raycast hit object: {hit.collider.gameObject.name}");
             
             var basket = hit.collider.GetComponent<Basket>();
             if (basket != null)
             {
-                Debug.Log($"TouchManager: Found Basket component on {hit.collider.gameObject.name}");
                 basket.OnTouchDown(touchId, position);
                 return;
-            }
-            else
-            {
-                Debug.Log($"TouchManager: No Basket component found on {hit.collider.gameObject.name}");
             }
 
             var pickable = hit.collider.GetComponent<IPickable>();
             if (pickable != null)
             {
-                Debug.Log($"TouchManager: Found Pickable component on {hit.collider.gameObject.name}");
                 pickable.OnTouchPick(touchId);
-            }
-        }
-        else
-        {
-            Debug.Log("TouchManager: Raycast didn't hit anything");
-        }
-    }
-
-    private void HandleTouchMoved(int touchId, Vector2 position)
-    {
-        Vector3 worldPosition = GetWorldPosition(position);
-        foreach (var pickable in FindObjectsOfType<PickableObject>())
-        {
-            if (pickable.CurrentTouchId == touchId)
-            {
-                pickable.OnTouchMove(touchId, worldPosition);
             }
         }
     }
@@ -129,8 +122,10 @@ public class TouchManager : MonoBehaviour
 
     private Vector3 GetWorldPosition(Vector2 screenPosition)
     {
+        float zDistance = 10f;
         Vector3 worldPos = screenPosition;
-        worldPos.z = 10;
-        return mainCamera.ScreenToWorldPoint(worldPos);
+        worldPos.z = zDistance;
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(worldPos);
+        return worldPosition;
     }
 }
