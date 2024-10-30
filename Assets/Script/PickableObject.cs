@@ -1,29 +1,26 @@
 ﻿using UnityEngine;
-public interface IPickable
-{
-    void OnTouchPick(int touchId);
-    void OnTouchMove(int touchId, Vector3 position);
-    void OnTouchDrop(int touchId, Vector2 screenPosition);
-}
+
 public class PickableObject : MonoBehaviour, IPickable
 {
-    public int? CurrentTouchId { get; private set; }
     protected Camera mainCamera;
     private WorkStation currentWorkStation = null;
-    private bool isBeingDragged = false;
-    private Vector3 originalPosition; // Garde en mémoire la position originale en cas d'échec du déplacement
+    
+    // Implémentation des propriétés de IPickable
+    public int? CurrentTouchId { get; protected set; }
+    public bool IsBeingDragged { get; protected set; }
+    public Vector3 OriginalPosition { get; protected set; }
 
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         mainCamera = Camera.main;
     }
 
     public virtual void OnTouchPick(int touchId)
     {
-        if (!CurrentTouchId.HasValue && !isBeingDragged)
+        if (!CurrentTouchId.HasValue && !IsBeingDragged)
         {
             // Sauvegarde de la position actuelle
-            originalPosition = transform.position;
+            OriginalPosition = transform.position;
             
             // Si l'objet est sur une workstation, on la libère temporairement
             if (currentWorkStation != null)
@@ -33,14 +30,14 @@ public class PickableObject : MonoBehaviour, IPickable
             }
 
             CurrentTouchId = touchId;
-            isBeingDragged = true;
+            IsBeingDragged = true;
             Debug.Log($"Object picked up by touch {touchId}: {gameObject.name}");
         }
     }
 
     public virtual void OnTouchMove(int touchId, Vector3 position)
     {
-        if (CurrentTouchId == touchId && isBeingDragged)
+        if (CurrentTouchId == touchId && IsBeingDragged)
         {
             transform.position = position;
         }
@@ -48,21 +45,37 @@ public class PickableObject : MonoBehaviour, IPickable
 
     public virtual void OnTouchDrop(int touchId, Vector2 screenPosition)
     {
-        if (CurrentTouchId == touchId && isBeingDragged)
+        if (CurrentTouchId == touchId && IsBeingDragged)
         {
-            if (!TryDropObject(screenPosition))
+            bool dropSuccessful = TryDropObject(screenPosition);
+            
+            if (!dropSuccessful)
             {
-                // Si le drop a échoué et qu'on venait d'une workstation, on retourne à la position originale
-                if (currentWorkStation != null)
-                {
-                    Debug.Log($"Drop failed, returning {gameObject.name} to original position");
-                    transform.position = originalPosition;
-                    currentWorkStation.TryPlaceIngredient(gameObject);
-                }
+                OnPickFailed();
             }
 
-            isBeingDragged = false;
+            IsBeingDragged = false;
             CurrentTouchId = null;
+        }
+    }
+
+    public virtual void OnPickFailed()
+    {
+        if (currentWorkStation != null)
+        {
+            Debug.Log($"Pick failed, returning {gameObject.name} to original position");
+            transform.position = OriginalPosition;
+            if (!currentWorkStation.TryPlaceIngredient(gameObject))
+            {
+                // Si même le retour à la workstation d'origine échoue, on détruit l'objet
+                Debug.Log($"Failed to return to original workstation, destroying {gameObject.name}");
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            Debug.Log($"Pick failed and no workstation, destroying {gameObject.name}");
+            Destroy(gameObject);
         }
     }
 
@@ -79,12 +92,11 @@ public class PickableObject : MonoBehaviour, IPickable
                 if (newStation == currentWorkStation)
                 {
                     Debug.Log("Dropping back on the same workstation");
-                    newStation.TryPlaceIngredient(gameObject);
-                    return true;
+                    return newStation.TryPlaceIngredient(gameObject);
                 }
                 
                 // Si on essaie de placer sur une nouvelle workstation
-                if (!newStation.HasIngredient() && newStation.TryPlaceIngredient(gameObject))
+                if (newStation.TryPlaceIngredient(gameObject))
                 {
                     Debug.Log($"Successfully moved to new workstation: {newStation.name}");
                     currentWorkStation = newStation;
@@ -102,18 +114,25 @@ public class PickableObject : MonoBehaviour, IPickable
         if (currentWorkStation != null)
         {
             Debug.Log("Dropped outside workstation, returning to original position");
-            return false;
+            transform.position = OriginalPosition;
+            currentWorkStation.TryPlaceIngredient(gameObject);
+            return true;
         }
         
         // Si on drop en dehors d'une workstation et qu'on ne venait pas d'une workstation
         Debug.Log("Dropped outside workstation, destroying object");
-        Destroy(gameObject);
+        Destroy(gameObject); // Assurez-vous que cette ligne s'exécute
         return true;
     }
 
-    // Méthode helper pour définir la workstation actuelle (utile pour l'initialisation)
     public void SetCurrentWorkStation(WorkStation station)
     {
         currentWorkStation = station;
     }
+
+    public WorkStation GetCurrentWorkStation()
+    {
+        return currentWorkStation;
+    }
+    
 }

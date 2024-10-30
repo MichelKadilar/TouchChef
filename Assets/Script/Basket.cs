@@ -2,29 +2,36 @@
 
 public class Basket : MonoBehaviour
 {
-    public GameObject vegetablePrefab;
-    private Camera mainCamera;
-
-    void Start()
-    {
-        mainCamera = Camera.main;
-    }
-
+    [SerializeField] private GameObject ingredientPrefab;
+    [SerializeField] private IngredientType ingredientType;
+    
     public void OnTouchDown(int touchId, Vector2 position)
     {
-        Debug.Log($"Basket touché avec touchId: {touchId} à la position écran: {position}");
-
-        Vector3 spawnPosition = transform.position + new Vector3(0, 0, -10);
-        GameObject vegetable = Instantiate(vegetablePrefab, spawnPosition, Quaternion.identity);
-
-        if (vegetable.TryGetComponent<IPickable>(out var pickable))
+        Debug.Log($"Basket.OnTouchDown called on {gameObject.name}");
+        if (ingredientPrefab == null)
         {
-            Debug.Log($"Objet créé: {vegetable.name} et associé à touchId: {touchId}");
+            Debug.LogError($"Basket {gameObject.name}: ingredientPrefab not assigned!");
+            return;
+        }
+
+        // Convertir la position du touch en position monde
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(new Vector3(
+            position.x, 
+            position.y, 
+            Mathf.Abs(Camera.main.transform.position.z + 10)
+        ));
+    
+        GameObject ingredient = Instantiate(ingredientPrefab, worldPosition, Quaternion.identity);
+        Debug.Log($"Created ingredient: {ingredient.name} at position {worldPosition}");
+    
+        if (ingredient.TryGetComponent<IPickable>(out var pickable))
+        {
             pickable.OnTouchPick(touchId);
         }
         else
         {
-            Debug.LogWarning("Le prefab vegetable ne contient pas de composant IPickable.");
+            Debug.LogError($"Created ingredient does not have IPickable component!");
+            Destroy(ingredient);
         }
     }
 }

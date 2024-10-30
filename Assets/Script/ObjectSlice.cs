@@ -9,13 +9,11 @@ public class ObjectSlice : MonoBehaviour, IPointerClickHandler
     private GameObject instantiatedObjectState2; // To hold the instantiated second state
     private int sliceState = 0;
     
-    public PickableObject pickableObject;
 
     void Start()
     {
         Debug.Log("CarrotSlice script attached to: " + name);
         ObjectState1.SetActive(true);
-        
     }
 
     public void isClicked()

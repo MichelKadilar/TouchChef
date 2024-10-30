@@ -411,6 +411,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: cuttingboard
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 044394d84650a6d4eb9ff7c6d8744e72, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: 044394d84650a6d4eb9ff7c6d8744e72, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -512,7 +520,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 129176340}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PositionIngredient
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -598,6 +606,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: food_ingredient_tomato
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -669,6 +685,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 05e4de3c04646594aa8efbe4e109323b, type: 3}
       propertyPath: m_Name
       value: knife (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 05e4de3c04646594aa8efbe4e109323b, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1661,6 +1681,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: food_ingredient_tomato (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1882,6 +1910,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
       propertyPath: m_Name
       value: food_ingredient_tomato (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4561,61 +4597,20 @@ PrefabInstance:
       propertyPath: m_Name
       value: plate
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d2e462ecd7950d143a9058c087254346, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d2e462ecd7950d143a9058c087254346, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1385043994}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d2e462ecd7950d143a9058c087254346, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1385043997}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d2e462ecd7950d143a9058c087254346, type: 3}
 --- !u!4 &1385043992 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d2e462ecd7950d143a9058c087254346, type: 3}
   m_PrefabInstance: {fileID: 1385043991}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1385043993 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: d2e462ecd7950d143a9058c087254346, type: 3}
-  m_PrefabInstance: {fileID: 1385043991}
-  m_PrefabAsset: {fileID: 0}
---- !u!65 &1385043994
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1385043993}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.95000005, y: 0.10000006, z: 0.9500002}
-  m_Center: {x: -0.000000014901161, y: 0.050000127, z: 0}
---- !u!114 &1385043997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1385043993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 974c745c33f145dcb55e888b2bfa9cc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vegetablePrefab: {fileID: 1088444659871909439, guid: af1102565efc024428d082d08c531865, type: 3}
 --- !u!1001 &1397360687
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5093,6 +5088,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: food_ingredient_tomato (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -5192,6 +5195,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
       propertyPath: m_Name
       value: food_ingredient_tomato (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5522,7 +5533,7 @@ GameObject:
   - component: {fileID: 1579635156}
   - component: {fileID: 1579635158}
   - component: {fileID: 1579635159}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PlanDeTravailBasDroite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5580,7 +5591,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stationType: 1
   ingredientPosition: {fileID: 129176340}
+  processRadius: 1
+  availableVisual: {fileID: 0}
+  processingVisual: {fileID: 0}
+  invalidPlacementVisual: {fileID: 0}
+  OnProcessingProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  OnProcessingComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientRemoved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1597728117
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6123,7 +6151,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1755661684}
-  m_Layer: 0
+  - component: {fileID: 1755661686}
+  - component: {fileID: 1755661685}
+  m_Layer: 3
   m_Name: AssietteTomate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6152,6 +6182,41 @@ Transform:
   - {fileID: 1733689412}
   m_Father: {fileID: 1606380479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1755661685
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1755661683}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.6707287, y: 3.744915, z: 1}
+  m_Center: {x: 0.07418728, y: -0.037093163, z: 0}
+--- !u!114 &1755661686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1755661683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 974c745c33f145dcb55e888b2bfa9cc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ingredientPrefab: {fileID: 1088444659871909439, guid: af1102565efc024428d082d08c531865, type: 3}
+  ingredientType: 0
 --- !u!1001 &1771235039
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7566,6 +7631,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: food_ingredient_tomato (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7656,7 +7729,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stationType: 0
   ingredientPosition: {fileID: 2070028532}
+  processRadius: 1
+  availableVisual: {fileID: 0}
+  processingVisual: {fileID: 0}
+  invalidPlacementVisual: {fileID: 0}
+  OnProcessingProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  OnProcessingComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientRemoved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &2104413253
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7767,7 +7857,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stationType: 0
   ingredientPosition: {fileID: 2070028532}
+  processRadius: 1
+  availableVisual: {fileID: 0}
+  processingVisual: {fileID: 0}
+  invalidPlacementVisual: {fileID: 0}
+  OnProcessingProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  OnProcessingComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIngredientRemoved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!65 &2115967809
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7801,7 +7908,8 @@ GameObject:
   - component: {fileID: 2133961566}
   - component: {fileID: 2133961565}
   - component: {fileID: 2133961568}
-  m_Layer: 0
+  - component: {fileID: 2133961569}
+  m_Layer: 3
   m_Name: Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -7825,7 +7933,7 @@ Camera:
   m_GameObject: {fileID: 2133961564}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -7892,6 +8000,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d16dfa2ead044828fce91ec1a9bdf4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  touchRadius: 0.5
+  interactableLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &2133961569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2133961564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63382dc0ebf4471b370835a750391fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &2143024465 stripped
