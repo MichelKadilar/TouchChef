@@ -138,7 +138,7 @@ MonoBehaviour:
   holdDuration: 1
   holdRadius: 50
   debugMode: 1
-  holdIndicatorPrefab: {fileID: 4944877833734604991, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
+  holdIndicatorPrefab: {fileID: 458705955363178892, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
   OnHoldComplete:
     m_PersistentCalls:
       m_Calls: []
