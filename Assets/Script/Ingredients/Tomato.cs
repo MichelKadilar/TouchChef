@@ -10,8 +10,15 @@ namespace Script.Ingredients
         
         protected override void Awake()
         {
+            if (allowedProcesses == null)
+            {
+                allowedProcesses = new List<ProcessType>();
+            }
+            allowedProcesses.Clear(); // S'assurer qu'il n'y a pas de doublons
+            allowedProcesses.Add(ProcessType.Cut);
+        
+            Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
             base.Awake();
-            allowedProcesses = new List<ProcessType> { ProcessType.Cut };
             UpdateVisual();
         }
 
@@ -20,8 +27,8 @@ namespace Script.Ingredients
             switch (processType)
             {
                 case ProcessType.Cut:
-                    if (currentState == IngredientState.Washed)
-                        currentState = IngredientState.Cut;
+                    // Plus de vérification de l'état Washed
+                    currentState = IngredientState.Cut;
                     break;
             }
             UpdateVisual();

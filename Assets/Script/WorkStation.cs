@@ -22,6 +22,7 @@ public class WorkStation : MonoBehaviour
     private bool isOccupied = false;
     private GameObject currentIngredient = null;
     private BaseIngredient currentProcessable = null;
+    private bool isProcessing = false;
 
     private void Start()
     {
@@ -30,18 +31,30 @@ public class WorkStation : MonoBehaviour
 
     public bool TryPlaceIngredient(GameObject ingredient)
     {
+        Debug.Log($"Attempting to place {ingredient.name} on workstation {gameObject.name} of type {stationType}");
+
         // Si déjà occupé et pas le même ingrédient, refuser
         if (isOccupied && currentIngredient != ingredient)
         {
+            Debug.Log($"Workstation {gameObject.name} is occupied by different ingredient");
             ShowInvalidPlacement();
             return false;
         }
 
         // Vérifier si l'ingrédient peut être processé
         var processable = ingredient.GetComponent<BaseIngredient>();
-        if (processable == null || !processable.CanProcess(stationType))
+        if (processable != null)
         {
-            Debug.Log($"Ingredient {ingredient.name} cannot be processed here - Type: {stationType}");
+            if (!processable.CanProcess(stationType))
+            {
+                Debug.Log($"Ingredient {ingredient.name} cannot be processed here - Type: {stationType}");
+                ShowInvalidPlacement();
+                return false;
+            }
+        }
+        else
+        {
+            Debug.Log($"Ingredient {ingredient.name} does not have BaseIngredient component");
             ShowInvalidPlacement();
             return false;
         }
@@ -56,8 +69,7 @@ public class WorkStation : MonoBehaviour
             currentIngredient = ingredient;
             currentProcessable = processable;
             isOccupied = true;
-            
-            // Mettre à jour la référence de la workstation dans l'ingrédient
+        
             var pickable = ingredient.GetComponent<PickableObject>();
             if (pickable != null)
             {
@@ -65,10 +77,16 @@ public class WorkStation : MonoBehaviour
             }
 
             OnIngredientPlaced?.Invoke();
+            Debug.Log($"Successfully placed {ingredient.name} on workstation {gameObject.name}");
         }
 
         UpdateVisuals();
         return true;
+    }
+    protected virtual void CompleteProcessing()
+    {
+        isProcessing = false;
+        UpdateVisuals();
     }
 
     public void RemoveIngredient()
@@ -85,18 +103,15 @@ public class WorkStation : MonoBehaviour
 
     public void StartProcessing()
     {
-        if (currentProcessable != null && currentProcessable.CanProcess(stationType))
+        if (isProcessing || !HasIngredient()) return;
+
+        isProcessing = true;
+    
+        if (currentProcessable != null && currentProcessable.CanStartProcessing(stationType))  // Utilise CanStartProcessing au lieu de CanProcess
         {
             Debug.Log($"Starting processing of {currentIngredient.name} - Type: {stationType}");
-            
-            // S'abonner aux événements de progression
             currentProcessable.Process(stationType);
             ShowProcessingVisual();
-        }
-        else
-        {
-            Debug.Log($"Cannot process {currentIngredient?.name} - Type: {stationType}");
-            ShowInvalidPlacement();
         }
     }
 

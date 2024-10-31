@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1448490942833731562}
   - component: {fileID: 3192120803467326570}
   - component: {fileID: 5524560096256505368}
+  - component: {fileID: 3151719163591571295}
   m_Layer: 3
   m_Name: food_ingredient_tomato 1
   m_TagString: Untagged
@@ -100,7 +101,6 @@ MonoBehaviour:
   allowedProcesses: 01000000
   processingTime: 3
   rawVisual: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
-  washedVisual: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
   cutVisual: {fileID: 919132149155446097, guid: 4eb9af19e4044e14da1f02468f48e21f, type: 3}
 --- !u!65 &5524560096256505368
 BoxCollider:
@@ -117,9 +117,28 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.0075000017, y: 0.0074999994, z: 0.007}
   m_Center: {x: -6.5192296e-12, y: -6.426144e-11, z: 0.0034999857}
+--- !u!114 &3151719163591571295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1088444659871909439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be56d21311e497eb26fb3211c7bd032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdRadius: 50
+  debugMode: 1
+  holdIndicatorPrefab: {fileID: 4944877833734604991, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
+  OnHoldComplete:
+    m_PersistentCalls:
+      m_Calls: []

@@ -4,6 +4,8 @@ public class PickableObject : MonoBehaviour, IPickable
 {
     protected Camera mainCamera;
     private WorkStation currentWorkStation = null;
+    private WorkStation previousWorkStation = null;
+    private bool isFromBasket = true;
     
     // Implémentation des propriétés de IPickable
     public int? CurrentTouchId { get; protected set; }
@@ -19,22 +21,21 @@ public class PickableObject : MonoBehaviour, IPickable
     {
         if (!CurrentTouchId.HasValue && !IsBeingDragged)
         {
-            // Sauvegarde de la position actuelle
             OriginalPosition = transform.position;
             
-            // Si l'objet est sur une workstation, on la libère temporairement
             if (currentWorkStation != null)
             {
                 Debug.Log($"Picking up {gameObject.name} from workstation {currentWorkStation.name}");
+                previousWorkStation = currentWorkStation;
                 currentWorkStation.RemoveIngredient();
+                isFromBasket = false; // Si on le prend d'une workstation, ce n'est plus un objet du basket
             }
 
             CurrentTouchId = touchId;
             IsBeingDragged = true;
-            Debug.Log($"Object picked up by touch {touchId}: {gameObject.name}");
+            Debug.Log($"Object picked up by touch {touchId}: {gameObject.name}, IsFromBasket: {isFromBasket}");
         }
     }
-
     public virtual void OnTouchMove(int touchId, Vector3 position)
     {
         if (CurrentTouchId == touchId && IsBeingDragged)
@@ -61,38 +62,68 @@ public class PickableObject : MonoBehaviour, IPickable
 
     public virtual void OnPickFailed()
     {
-        if (currentWorkStation != null)
+        if (!isFromBasket && previousWorkStation != null)
         {
-            Debug.Log($"Pick failed, returning {gameObject.name} to original position");
+            Debug.Log($"Pick failed, returning {gameObject.name} to previous workstation");
             transform.position = OriginalPosition;
-            if (!currentWorkStation.TryPlaceIngredient(gameObject))
+            if (previousWorkStation.TryPlaceIngredient(gameObject))
             {
-                // Si même le retour à la workstation d'origine échoue, on détruit l'objet
-                Debug.Log($"Failed to return to original workstation, destroying {gameObject.name}");
-                Destroy(gameObject);
+                currentWorkStation = previousWorkStation;
+                previousWorkStation = null;
+                return;
             }
         }
-        else
-        {
-            Debug.Log($"Pick failed and no workstation, destroying {gameObject.name}");
-            Destroy(gameObject);
-        }
+        
+        Debug.Log($"Pick failed and from basket or no valid workstation, destroying {gameObject.name}");
+        Destroy(gameObject);
     }
+    
 
     protected virtual bool TryDropObject(Vector2 screenPosition)
     {
         Ray ray = mainCamera.ScreenPointToRay(screenPosition);
-        
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        Debug.Log($"Attempting to drop {gameObject.name} - Casting ray from {ray.origin}");
+
+        // Désactiver temporairement notre propre collider pour le raycast
+        var ownCollider = GetComponent<Collider>();
+        if (ownCollider != null)
         {
+            ownCollider.enabled = false;
+        }
+        
+        // Faire le raycast
+        RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
+        
+        // Réactiver notre collider
+        if (ownCollider != null)
+        {
+            ownCollider.enabled = true;
+        }
+
+        bool foundWorkstation = false;
+        foreach (var hit in hits)
+        {
+            // Ignorer notre propre gameObject
+            if (hit.collider.gameObject == gameObject) continue;
+            
+            Debug.Log($"Hit object during drop: {hit.collider.gameObject.name}");
             WorkStation newStation = hit.collider.GetComponent<WorkStation>();
             if (newStation != null)
             {
-                // Si on essaie de placer sur la même workstation
-                if (newStation == currentWorkStation)
+                foundWorkstation = true;
+                Debug.Log($"Attempting to place on workstation: {newStation.name}");
+                
+                // Si on essaie de placer sur l'ancienne workstation
+                if (!isFromBasket && newStation == previousWorkStation)
                 {
-                    Debug.Log("Dropping back on the same workstation");
-                    return newStation.TryPlaceIngredient(gameObject);
+                    Debug.Log($"Dropping back on previous workstation: {newStation.name}");
+                    bool success = newStation.TryPlaceIngredient(gameObject);
+                    if (success) 
+                    {
+                        currentWorkStation = newStation;
+                        isFromBasket = false;
+                    }
+                    return success;
                 }
                 
                 // Si on essaie de placer sur une nouvelle workstation
@@ -100,34 +131,40 @@ public class PickableObject : MonoBehaviour, IPickable
                 {
                     Debug.Log($"Successfully moved to new workstation: {newStation.name}");
                     currentWorkStation = newStation;
+                    previousWorkStation = null;
+                    isFromBasket = false;
                     return true;
-                }
-                else
-                {
-                    Debug.Log("New workstation is occupied or placement failed");
-                    return false;
                 }
             }
         }
 
-        // Si on drop en dehors d'une workstation et qu'on venait d'une workstation
-        if (currentWorkStation != null)
+        if (!foundWorkstation)
         {
-            Debug.Log("Dropped outside workstation, returning to original position");
+            Debug.Log($"No workstation found during drop for {gameObject.name}");
+        }
+
+        // Si on drop en dehors d'une workstation
+        if (!isFromBasket && previousWorkStation != null)
+        {
+            Debug.Log($"Dropped outside, returning to previous workstation: {previousWorkStation.name}");
             transform.position = OriginalPosition;
-            currentWorkStation.TryPlaceIngredient(gameObject);
-            return true;
+            bool success = previousWorkStation.TryPlaceIngredient(gameObject);
+            if (success)
+            {
+                currentWorkStation = previousWorkStation;
+                return true;
+            }
         }
         
-        // Si on drop en dehors d'une workstation et qu'on ne venait pas d'une workstation
-        Debug.Log("Dropped outside workstation, destroying object");
-        Destroy(gameObject); // Assurez-vous que cette ligne s'exécute
+        Debug.Log($"Object is from basket or has no previous workstation, destroying {gameObject.name}");
+        Destroy(gameObject);
         return true;
     }
 
     public void SetCurrentWorkStation(WorkStation station)
     {
         currentWorkStation = station;
+        isFromBasket = false;
     }
 
     public WorkStation GetCurrentWorkStation()
