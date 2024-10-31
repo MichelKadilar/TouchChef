@@ -27,22 +27,16 @@ public abstract class BaseIngredient : PickableObject, IProcessable
 
     private void InitializeHoldDetector()
     {
-        // Si le holdDetector est déjà initialisé et configuré, on skip
         if (holdDetector != null && holdDetector.OnHoldComplete.GetPersistentEventCount() > 0)
             return;
-
+        
         holdDetector = GetComponent<HoldDetector>();
         if (holdDetector == null)
         {
             holdDetector = gameObject.AddComponent<HoldDetector>();
-            Debug.Log($"Added HoldDetector to {gameObject.name}");
         }
-
-        // S'assurer que l'event n'est pas déjà attaché avant de l'ajouter
         holdDetector.OnHoldComplete.RemoveListener(OnHoldCompleted);
         holdDetector.OnHoldComplete.AddListener(OnHoldCompleted);
-        
-        Debug.Log($"HoldDetector initialized on {gameObject.name} with {holdDetector.OnHoldComplete.GetPersistentEventCount()} listeners");
     }
     
     public virtual bool CanProcess(ProcessType processType)
@@ -52,8 +46,7 @@ public abstract class BaseIngredient : PickableObject, IProcessable
             Debug.LogError($"{gameObject.name}: allowedProcesses is null!");
             return false;
         }
-
-        // On vérifie seulement si l'ingrédient est en cours de processing
+        
         if (isProcessing)
         {
             Debug.Log($"Cannot process {gameObject.name}: already processing");

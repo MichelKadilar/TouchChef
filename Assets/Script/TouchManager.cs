@@ -45,7 +45,6 @@ public class TouchManager : MonoBehaviour
 
     private void SetupInputActions()
     {
-        // Gestion du début du touch/clic
         touchActions.Touch.PrimaryTouch.started += ctx =>
         {
             var touchId = GetTouchId(ctx);
@@ -53,8 +52,7 @@ public class TouchManager : MonoBehaviour
             Debug.Log($"Touch/Click started with ID {touchId} at position {position}");
             HandleTouchStart(touchId, position);
         };
-
-        // Gestion de la fin du touch/clic
+        
         touchActions.Touch.PrimaryTouch.canceled += ctx =>
         {
             var touchId = GetTouchId(ctx);
@@ -62,8 +60,7 @@ public class TouchManager : MonoBehaviour
             Debug.Log($"Touch/Click ended with ID {touchId} at position {position}");
             HandleTouchEnd(touchId, position);
         };
-
-        // Gestion du mouvement
+        
         touchActions.Touch.PrimaryTouchPosition.performed += ctx =>
         {
             var touchId = GetTouchId(ctx);
@@ -87,8 +84,7 @@ public class TouchManager : MonoBehaviour
             isHolding = false,
             targetObject = GetTouchedObject(position)
         };
-
-        // Vérifier si un objet est déjà en cours de drag
+        
         bool isAnyObjectDragged = FindObjectsOfType<MonoBehaviour>()
             .OfType<IPickable>()
             .Any(p => p.IsBeingDragged);
@@ -98,8 +94,7 @@ public class TouchManager : MonoBehaviour
             Debug.Log("An object is already being dragged");
             return;
         }
-
-        // Gestion du raycast et des interactions
+        
         Ray ray = mainCamera.ScreenPointToRay(position);
         RaycastHit[] hits = Physics.RaycastAll(ray, 100f, interactableLayer);
 
@@ -110,8 +105,7 @@ public class TouchManager : MonoBehaviour
             foreach (var hit in hits)
             {
                 Debug.Log($"Processing hit on: {hit.collider.gameObject.name}");
-
-                // 1. D'abord vérifier le Basket
+                
                 var basket = hit.collider.GetComponent<Basket>();
                 if (basket != null)
                 {
@@ -119,13 +113,11 @@ public class TouchManager : MonoBehaviour
                     basket.OnTouchDown(touchId, position);
                     return;
                 }
-
-                // 2. Ensuite vérifier les ingrédients
+                
                 var ingredient = hit.collider.GetComponent<BaseIngredient>();
                 var pickable = hit.collider.GetComponent<IPickable>();
                 if (ingredient != null)
                 {
-                    // Si l'ingrédient est sur une workstation, utiliser le hold
                     if (ingredient.GetCurrentWorkStation() != null)
                     {
                         var holdDetector = ingredient.GetComponent<HoldDetector>();
@@ -137,7 +129,6 @@ public class TouchManager : MonoBehaviour
                             return;
                         }
                     }
-                    // Si l'ingrédient n'est pas sur une workstation, permettre le drag
                     else
                     {
                         Debug.Log($"Picking up ingredient: {ingredient.name}");
@@ -150,7 +141,6 @@ public class TouchManager : MonoBehaviour
                     }
                 }
                 
-                // 3. Finalement, vérifier les autres pickables
                 pickable = hit.collider.GetComponent<IPickable>();
                 if (pickable != null && !pickable.IsBeingDragged)
                 {
@@ -165,8 +155,7 @@ public class TouchManager : MonoBehaviour
     private void HandleTouchMove(int touchId, Vector2 position)
     {
         if (!activeTouches.ContainsKey(touchId)) return;
-
-        // Vérifier d'abord si un objet est en cours de drag
+        
         bool objectMoved = false;
         Vector3 worldPosition = GetWorldPosition(position);
         foreach (var pickable in FindObjectsOfType<MonoBehaviour>().OfType<IPickable>())
@@ -178,8 +167,7 @@ public class TouchManager : MonoBehaviour
                 Debug.Log($"Moving dragged object {(pickable as MonoBehaviour).gameObject.name}");
             }
         }
-
-        // Si aucun objet n'est en cours de drag, mettre à jour les hold detectors
+        
         if (!objectMoved && touchInfos.TryGetValue(touchId, out TouchInfo info) && info.isHolding)
         {
             var ingredients = FindObjectsOfType<BaseIngredient>();
@@ -202,12 +190,10 @@ public class TouchManager : MonoBehaviour
         {
             if (Time.time - info.startTime < tapThreshold && !info.isHolding)
             {
-                // C'était un tap rapide
                 HandleTapProcess(info.targetObject);
             }
         }
-
-        // Gérer les drops AVANT d'arrêter les holds
+        
         foreach (var pickable in FindObjectsOfType<MonoBehaviour>().OfType<IPickable>())
         {
             if (pickable.CurrentTouchId == touchId && pickable.IsBeingDragged)
@@ -216,8 +202,7 @@ public class TouchManager : MonoBehaviour
                 pickable.OnTouchDrop(touchId, position);
             }
         }
-
-        // Arrêter les holds après avoir géré les drops
+        
         var ingredients = FindObjectsOfType<BaseIngredient>();
         foreach (var ingredient in ingredients)
         {
@@ -260,7 +245,7 @@ public class TouchManager : MonoBehaviour
         {
             return touchScreen.deviceId;
         }
-        return 0; // Pour la souris et autres dispositifs
+        return 0;
     }
 
     private void HandleTapProcess(GameObject targetObject)

@@ -14,7 +14,6 @@ public class HoldDetector : MonoBehaviour
     [Header("Visual Feedback")]
     [SerializeField] private GameObject holdIndicatorPrefab;
     
-    // Définir l'UnityEvent pour le hold complete
     public UnityEvent<int> OnHoldComplete = new UnityEvent<int>();
     
     private GameObject indicatorInstance;

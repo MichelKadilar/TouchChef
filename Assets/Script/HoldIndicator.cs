@@ -29,7 +29,6 @@ public class HoldIndicator : MonoBehaviour
 
     private void UpdateVisuals()
     {
-        // Protection contre les null
         if (propBlock == null) return;
         if (meshRenderer == null) return;
         if (indicatorMaterial == null) return;

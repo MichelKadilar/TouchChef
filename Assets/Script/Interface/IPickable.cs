@@ -9,5 +9,5 @@ public interface IPickable
     void OnTouchPick(int touchId);
     void OnTouchMove(int touchId, Vector3 position);
     void OnTouchDrop(int touchId, Vector2 screenPosition);
-    void OnPickFailed();  // Nouveau : appelé quand le drop échoue
+    void OnPickFailed(); 
 }

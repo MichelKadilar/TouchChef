@@ -14,7 +14,7 @@ namespace Script.Ingredients
             {
                 allowedProcesses = new List<ProcessType>();
             }
-            allowedProcesses.Clear(); // S'assurer qu'il n'y a pas de doublons
+            allowedProcesses.Clear();
             allowedProcesses.Add(ProcessType.Cut);
         
             Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
@@ -27,7 +27,6 @@ namespace Script.Ingredients
             switch (processType)
             {
                 case ProcessType.Cut:
-                    // Plus de vérification de l'état Washed
                     currentState = IngredientState.Cut;
                     break;
             }

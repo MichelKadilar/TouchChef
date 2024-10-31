@@ -13,8 +13,7 @@ public class Basket : MonoBehaviour
             Debug.LogError($"Basket {gameObject.name}: ingredientPrefab not assigned!");
             return;
         }
-
-        // Convertir la position du touch en position monde
+        
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(new Vector3(
             position.x, 
             position.y, 

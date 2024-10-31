@@ -11,7 +11,7 @@ public class RecipeManager : MonoBehaviour
     
     public bool ValidateRecipe(List<BaseIngredient> ingredients)
     {
-        // Vérifier si les ingrédients correspondent à la recette
-        return true; // À implémenter
+        //TODO
+        return true;
     }
 }
