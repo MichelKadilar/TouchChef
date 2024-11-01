@@ -101,7 +101,7 @@ MonoBehaviour:
   allowedProcesses: 01000000
   processingTime: 3
   rawVisual: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
-  cutVisual: {fileID: 919132149155446097, guid: 4eb9af19e4044e14da1f02468f48e21f, type: 3}
+  cutVisual: {fileID: 3741537667912801475, guid: 90615286548f7cd4c8a3880601da8b03, type: 3}
 --- !u!65 &5524560096256505368
 BoxCollider:
   m_ObjectHideFlags: 0

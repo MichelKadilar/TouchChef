@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using Script.Ingredients;
 
 public class HoldDetector : MonoBehaviour
 {
@@ -24,6 +25,7 @@ public class HoldDetector : MonoBehaviour
     private Vector2 holdStartPosition;
     private BaseIngredient ingredient;
     private Camera mainCamera;
+    
 
     private void Awake()
     {
@@ -43,13 +45,22 @@ public class HoldDetector : MonoBehaviour
     public void StartHolding(int touchId, Vector2 position)
     {
         if (debugMode) Debug.Log($"StartHolding called on {gameObject.name} with touchId {touchId}");
+    
+        // Check for double-tap and slicing
+        if (Input.touchCount == 2 && ingredient is Tomato tomato) 
+        {
+            tomato.Slice(position,mainCamera,ingredient);
+            return;
+        }
 
+        // Prevent multiple simultaneous holds
         if (isHolding || currentTouchId.HasValue)
         {
             if (debugMode) Debug.Log($"Hold failed: Already holding or touch assigned on {gameObject.name}");
             return;
         }
 
+        // Get the workstation and check if touch is within bounds
         var workStation = ingredient.GetCurrentWorkStation();
         if (workStation == null)
         {
@@ -57,17 +68,32 @@ public class HoldDetector : MonoBehaviour
             return;
         }
 
+        // Assuming workstation has a Collider2D component for boundary checks
+        Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
+        if (workStationCollider != null)
+        {
+            // Convert screen touch position to world position
+            Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
+        
+            if (!workStationCollider.bounds.Contains(worldPosition))
+            {
+                if (debugMode) Debug.Log($"Hold failed: Touch outside workstation bounds for {gameObject.name}");
+                return;
+            }
+        }
+
         if (debugMode) Debug.Log($"Starting hold process on {gameObject.name}");
 
+        // Initialize holding variables and start hold process
         currentTouchId = touchId;
         holdStartPosition = position;
         isHolding = true;
         currentHoldTime = 0f;
-        
+    
         CreateVisualIndicator(position);
-        
         StartCoroutine(HoldCoroutine());
     }
+
 
     private void CreateVisualIndicator(Vector2 position)
     {
