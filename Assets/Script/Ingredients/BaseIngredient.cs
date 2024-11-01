@@ -138,8 +138,11 @@ public abstract class BaseIngredient : PickableObject, IProcessable
 
     public override void OnTouchDrop(int touchId, Vector2 screenPosition)
     {
-        Debug.Log($"OnTouchDrop called on {gameObject.name} with touchId {touchId}");
+        float yRotation = transform.eulerAngles.y;
         base.OnTouchDrop(touchId, screenPosition);
+        Vector3 currentRotation = transform.eulerAngles;
+        currentRotation.y = yRotation;
+        transform.rotation = Quaternion.Euler(currentRotation);
     }
 
     private void OnDisable()
