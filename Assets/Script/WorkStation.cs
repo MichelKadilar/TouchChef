@@ -41,6 +41,16 @@ public class WorkStation : MonoBehaviour
             return false;
         }
 
+        if (this.stationType == ProcessType.Cook)
+        {
+        // Placer l'ingrédient
+        ingredient.transform.position = ingredientPosition.position;
+        ingredient.transform.rotation = ingredientPosition.rotation;
+            
+        UpdateVisuals();
+        return true;
+        }
+
         // Vérifier si l'ingrédient peut être processé
         var processable = ingredient.GetComponent<BaseIngredient>();
         if (processable != null)
