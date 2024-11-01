@@ -164,7 +164,6 @@ public class TouchManager : MonoBehaviour
             {
                 pickable.OnTouchMove(touchId, worldPosition);
                 objectMoved = true;
-                Debug.Log($"Moving dragged object {(pickable as MonoBehaviour).gameObject.name}");
             }
         }
         
