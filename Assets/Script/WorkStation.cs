@@ -41,11 +41,12 @@ public class WorkStation : MonoBehaviour
             return false;
         }
 
-        if (this.stationType == ProcessType.Cook)
+        if (this.stationType == ProcessType.Heat)
         {
         // Placer l'ingrédient
         ingredient.transform.position = ingredientPosition.position;
         ingredient.transform.rotation = ingredientPosition.rotation;
+        isOccupied = true;
             
         UpdateVisuals();
         return true;

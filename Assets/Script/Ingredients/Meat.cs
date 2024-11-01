@@ -20,6 +20,7 @@ public class Meat : BaseIngredient
             }
             allowedProcesses.Clear();
             allowedProcesses.Add(ProcessType.Cut);
+            allowedProcesses.Add(ProcessType.Cook);
             
             base.Awake();
             UpdateVisual();

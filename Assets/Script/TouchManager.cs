@@ -252,6 +252,7 @@ public class TouchManager : MonoBehaviour
         if (targetObject == null) return;
 
         var workStation = targetObject.GetComponent<WorkStation>();
+        Debug.Log($"Tapped workstation: {workStation.name}");
         if (workStation != null && workStation.HasIngredient())
         {
             Debug.Log($"Processing at workstation: {workStation.name}");
