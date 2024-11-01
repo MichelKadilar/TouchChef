@@ -5591,7 +5591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stationType: 1
+  stationType: 0
   ingredientPosition: {fileID: 129176340}
   processRadius: 1
   availableVisual: {fileID: 0}
@@ -7857,7 +7857,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stationType: 1
+  stationType: 0
   ingredientPosition: {fileID: 2070028532}
   processRadius: 1
   availableVisual: {fileID: 0}

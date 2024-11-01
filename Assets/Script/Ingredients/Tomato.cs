@@ -1,15 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Script.Ingredients
 {
     public class Tomato : BaseIngredient
     {
-        [SerializeField] private GameObject rawVisual;
-        [SerializeField] private GameObject cutVisual;
+        [Header("Slider")]
+        public GameObject sliderPrefab; // Prefab for the slider
+        
+        [Header("Slice Options")]
+        public int neededSlices = 4; // Number of slices needed to complete slicing
+        
+        [SerializeField] private GameObject rawVisual; // Raw visual representation
+        [SerializeField] private GameObject cutVisual; // Cut visual representation
+        
+        private Slider slider; // Reference to the slider
+        private int currentSlice = 0; // Current slice count
         
         private GameObject instantiatedCutTomato; // To hold the instantiated cut visual
+        private GameObject sliderInstance; // To hold the instantiated slider
 
         protected override void Awake()
         {
@@ -26,27 +37,58 @@ namespace Script.Ingredients
             Debug.Log($" CURRENT STATE : {currentState}");
         }
 
-        public void Slice(Vector2 position, Camera camera,BaseIngredient ingredient)
+        // This method is called to slice the tomato
+        public void Slice(Vector2 position, Camera camera, BaseIngredient ingredient)
         {
-            
             if (currentState == IngredientState.Raw)
             {
-                CompleteProcessing(ProcessType.Cut, position,camera,ingredient);
+                // Check if the slider has been instantiated
+                if (sliderInstance == null)
+                {
+                    Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y+3, 10));
+                    sliderInstance = Instantiate(sliderPrefab, rawPosition, Quaternion.identity, transform);
+                    slider = sliderInstance.GetComponentInChildren<Slider>();
+                    slider.maxValue = neededSlices;
+                    slider.value = currentSlice;
+                }
+
+                
+                currentSlice++;
+                slider.value = currentSlice;
+                
+                if (currentSlice == neededSlices)
+                {
+                    CompleteProcessing(ProcessType.Cut, position, camera, ingredient);
+                }
             }
         }
 
-        protected void CompleteProcessing(ProcessType processType, Vector2 position,Camera camera,BaseIngredient ingredient)
+        protected void CompleteProcessing(ProcessType processType, Vector2 position, Camera camera, BaseIngredient ingredient)
         {
             switch (processType)
             {
                 case ProcessType.Cut:
                     currentState = IngredientState.Cut;
+
+                    // Instantiate the cut visual when slicing is complete
+                    Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y, 15));
+                    instantiatedCutTomato = Instantiate(cutVisual, rawPosition, Quaternion.identity);
+
+                    ingredient.gameObject.SetActive(false);
+                    Debug.Log("Object sliced!");
+                    
                     break;
             }
-            UpdateVisual(position,camera,ingredient);
+            // Destroy the slider after processing is complete
+            if (sliderInstance != null)
+            {
+                Destroy(sliderInstance);
+            }
+
+            UpdateVisual(position, camera); // Update visual state (if needed)
         }
 
-        private void UpdateVisual(Vector2 position,Camera camera = null,BaseIngredient ingredient = null)
+        private void UpdateVisual(Vector2 position, Camera camera = null)
         {
             if (currentState == IngredientState.Raw)
             {
@@ -58,20 +100,8 @@ namespace Script.Ingredients
             }
             else if (currentState == IngredientState.Cut)
             {
-                if (camera == null || ingredient == null)
-                {
-                    Debug.LogError("Camera or ingredient is null!");
-                    return;
-                }
-                Debug.Log("Position of the raw visual: " + position);
-                Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y,15));
-                instantiatedCutTomato = Instantiate(cutVisual, rawPosition, Quaternion.identity);
-
-                ingredient.gameObject.SetActive(false);
-                Debug.Log("Object sliced!");
+                Debug.Log("Cut visual instantiated!");
             }
         }
-
-        
     }
 }
