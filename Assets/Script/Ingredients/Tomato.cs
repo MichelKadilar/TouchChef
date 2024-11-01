@@ -1,10 +1,42 @@
-﻿namespace Script.Ingredients
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace Script.Ingredients
 {
-    public class Tomato: PickableObject, ICuttable
+    public class Tomato : BaseIngredient
     {
-        public void Cut()
+        [SerializeField] private GameObject rawVisual;
+        [SerializeField] private GameObject cutVisual;
+        
+        protected override void Awake()
         {
-            // On coupe la tomate
+            if (allowedProcesses == null)
+            {
+                allowedProcesses = new List<ProcessType>();
+            }
+            allowedProcesses.Clear();
+            allowedProcesses.Add(ProcessType.Cut);
+        
+            Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
+            base.Awake();
+            UpdateVisual();
+        }
+
+        protected override void CompleteProcessing(ProcessType processType)
+        {
+            switch (processType)
+            {
+                case ProcessType.Cut:
+                    currentState = IngredientState.Cut;
+                    break;
+            }
+            UpdateVisual();
+        }
+
+        private void UpdateVisual()
+        {
+            if (rawVisual != null) rawVisual.SetActive(currentState == IngredientState.Raw);
+            if (cutVisual != null) cutVisual.SetActive(currentState == IngredientState.Cut);
         }
     }
 }

@@ -2,98 +2,162 @@
 
 public class PickableObject : MonoBehaviour, IPickable
 {
-    private bool isPickedUp = false;
-    private Camera mainCamera;
+    protected Camera mainCamera;
+    private WorkStation currentWorkStation = null;
+    private WorkStation previousWorkStation = null;
+    private bool isFromBasket = true;
     
-    public bool isReadyToBeClickable = false;
+    public int? CurrentTouchId { get; protected set; }
+    public bool IsBeingDragged { get; protected set; }
+    public Vector3 OriginalPosition { get; protected set; }
 
-    void Start()
+    protected virtual void Awake()
     {
         mainCamera = Camera.main;
     }
 
-    public void OnPick()
+    public virtual void OnTouchPick(int touchId)
     {
-        Debug.Log("Object picked up: " + gameObject.name); // Log lorsque l'objet est ramassé
-        isPickedUp = true;
-    }
-
-    public void OnDrop()
-    {
-        Debug.Log("Object dropped: " + gameObject.name); // Log lorsque l'objet est relâché
-        isPickedUp = false;
-    }
-
-    public void OnMove(Vector3 newPosition)
-    {
-        if (isPickedUp)
+        if (!CurrentTouchId.HasValue && !IsBeingDragged)
         {
-            transform.position = newPosition;
+            OriginalPosition = transform.position;
+            
+            if (currentWorkStation != null)
+            {
+                Debug.Log($"Picking up {gameObject.name} from workstation {currentWorkStation.name}");
+                previousWorkStation = currentWorkStation;
+                currentWorkStation.RemoveIngredient();
+                isFromBasket = false;
+            }
+
+            CurrentTouchId = touchId;
+            IsBeingDragged = true;
+            Debug.Log($"Object picked up by touch {touchId}: {gameObject.name}, IsFromBasket: {isFromBasket}");
+        }
+    }
+    public virtual void OnTouchMove(int touchId, Vector3 position)
+    {
+        if (CurrentTouchId == touchId && IsBeingDragged)
+        {
+            transform.position = position;
         }
     }
 
-    void Update()
+    public virtual void OnTouchDrop(int touchId, Vector2 screenPosition)
     {
-        if (isPickedUp)
+        if (CurrentTouchId == touchId && IsBeingDragged)
         {
-            if (Input.GetMouseButton(0))
+            bool dropSuccessful = TryDropObject(screenPosition);
+            
+            if (!dropSuccessful)
             {
-                // Mouvement de l'objet avec la souris
-                Vector3 mousePos = Input.mousePosition;
-                mousePos.z = mainCamera.WorldToScreenPoint(transform.position).z;
-                Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
-                OnMove(worldPos);
+                OnPickFailed();
             }
-            else
-            {
-                // Si l'utilisateur relâche le clic, on tente de déposer l'objet
-                Debug.Log("Mouse button released, trying to drop object.");
-                TryDropObject();
-            }
+
+            IsBeingDragged = false;
+            CurrentTouchId = null;
         }
     }
 
-    void TryDropObject()
+    public virtual void OnPickFailed()
     {
-        // On fait un raycast pour vérifier si on relâche au-dessus d'un WorkStation
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        Debug.Log("Raycast initiated at mouse position.");
+        if (!isFromBasket && previousWorkStation != null)
+        {
+            Debug.Log($"Pick failed, returning {gameObject.name} to previous workstation");
+            transform.position = OriginalPosition;
+            if (previousWorkStation.TryPlaceIngredient(gameObject))
+            {
+                currentWorkStation = previousWorkStation;
+                previousWorkStation = null;
+                return;
+            }
+        }
         
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            Debug.Log("Raycast hit: " + hit.collider.name);
-
-            // Vérifie si on a bien touché un objet avec un script WorkStation
-            WorkStation station = hit.collider.GetComponent<WorkStation>();
-            if (station != null)
-            {
-                Debug.Log("Hit WorkStation: " + station.gameObject.name);
-
-                // Si la station est disponible, on place l'objet
-                if (station.TryPlaceIngredient(gameObject))
-                {
-                    Debug.Log("Ingredient placed successfully on the station.");
-                    OnDrop(); // Libère l'objet une fois placé
-                    isReadyToBeClickable = true; // Set this to true after a successful drop
-                    return; // Quitte la fonction car l'objet a été déposé correctement
-                }
-                else
-                {
-                    Debug.LogWarning("WorkStation is occupied, can't place the object.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("Raycast hit an object without WorkStation script.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Raycast did not hit any object.");
-        }
-
-        // Si on n'a pas trouvé d'endroit valide, l'objet est détruit
-        Debug.LogError("No valid drop location found. Destroying object.");
+        Debug.Log($"Pick failed and from basket or no valid workstation, destroying {gameObject.name}");
         Destroy(gameObject);
     }
+    
+
+    protected virtual bool TryDropObject(Vector2 screenPosition)
+    {
+        Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+        
+        var ownCollider = GetComponent<Collider>();
+        if (ownCollider != null)
+        {
+            ownCollider.enabled = false;
+        }
+        
+        RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
+        
+        if (ownCollider != null)
+        {
+            ownCollider.enabled = true;
+        }
+
+        bool foundWorkstation = false;
+        foreach (var hit in hits)
+        {
+            if (hit.collider.gameObject == gameObject) continue;
+            WorkStation newStation = hit.collider.GetComponent<WorkStation>();
+            if (newStation != null)
+            {
+                foundWorkstation = true;
+                Debug.Log($"Attempting to place on workstation: {newStation.name}");
+                if (!isFromBasket && newStation == previousWorkStation)
+                {
+                    Debug.Log($"Dropping back on previous workstation: {newStation.name}");
+                    bool success = newStation.TryPlaceIngredient(gameObject);
+                    if (success) 
+                    {
+                        currentWorkStation = newStation;
+                        isFromBasket = false;
+                    }
+                    return success;
+                }
+                
+                if (newStation.TryPlaceIngredient(gameObject))
+                {
+                    Debug.Log($"Successfully moved to new workstation: {newStation.name}");
+                    currentWorkStation = newStation;
+                    previousWorkStation = null;
+                    isFromBasket = false;
+                    return true;
+                }
+            }
+        }
+
+        if (!foundWorkstation)
+        {
+            Debug.Log($"No workstation found during drop for {gameObject.name}");
+        }
+        
+        if (!isFromBasket && previousWorkStation != null)
+        {
+            Debug.Log($"Dropped outside, returning to previous workstation: {previousWorkStation.name}");
+            transform.position = OriginalPosition;
+            bool success = previousWorkStation.TryPlaceIngredient(gameObject);
+            if (success)
+            {
+                currentWorkStation = previousWorkStation;
+                return true;
+            }
+        }
+        
+        Debug.Log($"Object is from basket or has no previous workstation, destroying {gameObject.name}");
+        Destroy(gameObject);
+        return true;
+    }
+
+    public void SetCurrentWorkStation(WorkStation station)
+    {
+        currentWorkStation = station;
+        isFromBasket = false;
+    }
+
+    public WorkStation GetCurrentWorkStation()
+    {
+        return currentWorkStation;
+    }
+    
 }
