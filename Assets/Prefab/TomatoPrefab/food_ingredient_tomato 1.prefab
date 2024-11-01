@@ -30,8 +30,8 @@ Transform:
   m_GameObject: {fileID: 1088444659871909439}
   serializedVersion: 2
   m_LocalRotation: {x: -0.98768, y: 0.11996968, z: -0.027291622, w: 0.0966986}
-  m_LocalPosition: {x: -5.81, y: -8.93, z: -4.23}
-  m_LocalScale: {x: 212.67998, y: 212.67998, z: 212.67998}
+  m_LocalPosition: {x: -5.8521, y: -9.0307, z: -3.6949}
+  m_LocalScale: {x: 368.70203, y: 368.70203, z: 368.70203}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allowedProcesses: 01000000
   processingTime: 3
-  sliderPrefab: {fileID: 457480461798116180, guid: 6d435134685c4404da3aa113e5ea0fb3, type: 3}
+  sliderPrefab: {fileID: 5193961890216719385, guid: 6d435134685c4404da3aa113e5ea0fb3, type: 3}
   neededSlices: 4
   rawVisual: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
   cutVisual: {fileID: 3741537667912801475, guid: 90615286548f7cd4c8a3880601da8b03, type: 3}
