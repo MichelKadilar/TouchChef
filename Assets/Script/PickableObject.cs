@@ -120,6 +120,7 @@ public class PickableObject : MonoBehaviour, IPickable
                 {
                     Debug.Log($"Successfully moved to new workstation: {newStation.name}");
                     currentWorkStation = newStation;
+                    Debug.Log($"The current workstation is now set to : {newStation.name}");
                     previousWorkStation = null;
                     isFromBasket = false;
                     return true;

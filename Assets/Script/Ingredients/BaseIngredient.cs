@@ -95,7 +95,7 @@ public abstract class BaseIngredient : PickableObject, IProcessable
             yield return null;
         }
         
-        CompleteProcessing(processType);
+        //CompleteProcessing(processType);
         isProcessing = false;
         Debug.Log($"Processing completed on {gameObject.name}");
     }

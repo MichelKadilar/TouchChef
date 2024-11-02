@@ -92,11 +92,6 @@ public class WorkStation : MonoBehaviour
             Debug.Log($"Successfully placed {ingredient.name} on workstation {gameObject.name}");
         }
 
-        if (this.stationType == ProcessType.Cook)
-        {
-            StartProcessing();
-        }
-
         UpdateVisuals();
         return true;
     }
@@ -191,5 +186,10 @@ public class WorkStation : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(ingredientPosition.position, processRadius);
         }
+    }
+
+    public Transform GetIngredientPosition()
+    {
+        return ingredientPosition;
     }
 }

@@ -40,6 +40,8 @@ public class Meat : BaseIngredient
                     {
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
+                        isProcessing = false;
+                        rawVisual.SetActive(false);
                     }
                     else
                     {
@@ -63,13 +65,14 @@ public class Meat : BaseIngredient
                     cookingTimer += Time.deltaTime;
                     float progress = cookingTimer / processingTime;
                     
-                    if (cookingTimer >= processingTime && currentState != IngredientState.Cooked)
+                    if (isProcessing && cookingTimer >= processingTime && currentState != IngredientState.Cooked)
                     {
+                        Debug.Log($"isCooked mmmmm yes");
                         CompleteProcessing(ProcessType.Cook);
                     }
                     else if (cookingTimer >= burnTime && currentState != IngredientState.Burned)
                     {
-                        CompleteProcessing(ProcessType.Cook);
+                        //CompleteProcessing(ProcessType.Cook);
                     }
                     
                     OnProcessingProgress(progress);
