@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class WorkStation : MonoBehaviour
@@ -89,6 +90,11 @@ public class WorkStation : MonoBehaviour
 
             OnIngredientPlaced?.Invoke();
             Debug.Log($"Successfully placed {ingredient.name} on workstation {gameObject.name}");
+        }
+
+        if (this.stationType == ProcessType.Cook)
+        {
+            StartProcessing();
         }
 
         UpdateVisuals();
