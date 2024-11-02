@@ -33,7 +33,7 @@ namespace Script.Ingredients
         
             Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
             base.Awake();
-            UpdateVisual(Vector2.zero);
+            UpdateVisual();
             Debug.Log($" CURRENT STATE : {currentState}");
         }
 
@@ -118,10 +118,10 @@ namespace Script.Ingredients
                 Destroy(sliderInstance);
             }
 
-            UpdateVisual(position, camera); // Update visual state (if needed)
+            UpdateVisual(); // Update visual state (if needed)
         }
 
-        private void UpdateVisual(Vector2 position, Camera camera = null)
+        private void UpdateVisual()
         {
             if (currentState == IngredientState.Raw)
             {
