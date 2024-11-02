@@ -38,10 +38,16 @@ public class Meat : BaseIngredient
                 case ProcessType.Cook:
                     if (cookingTimer < burnTime)
                     {
+                        Debug.Log("WAWAWAWAWAW");
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
+                        Transform ingredientPosition = this.GetCurrentWorkStation().GetIngredientPosition();
+                        Vector3 newPos = new Vector3(ingredientPosition.position.x, ingredientPosition.position.y,
+                            ingredientPosition.position.z);
+                        Debug.Log("LOG 9ABL");
+                        Instantiate(cookedVisual, newPos, Quaternion.identity);
+                        Debug.Log("LOG BA3D");
                         isProcessing = false;
-                        rawVisual.SetActive(false);
                     }
                     else
                     {
