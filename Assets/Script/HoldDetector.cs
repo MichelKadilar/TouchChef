@@ -52,7 +52,13 @@ public class HoldDetector : MonoBehaviour
             tomato.Slice(position,mainCamera,ingredient);
             return;
         }
-
+        
+        if(Input.touchCount == 2 && ingredient is Meat meat)
+        {
+            meat.Slice(position,mainCamera,ingredient);
+            return;
+        }
+        
         // Prevent multiple simultaneous holds
         if (isHolding || currentTouchId.HasValue)
         {
