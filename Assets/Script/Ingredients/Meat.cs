@@ -44,8 +44,10 @@ public class Meat : BaseIngredient
                         Transform ingredientPosition = this.GetCurrentWorkStation().GetIngredientPosition();
                         Vector3 newPos = new Vector3(ingredientPosition.position.x, ingredientPosition.position.y,
                             ingredientPosition.position.z);
+                        this.gameObject.SetActive(false);
                         Debug.Log("LOG 9ABL");
-                        Instantiate(cookedVisual, newPos, Quaternion.identity);
+                        Quaternion rotation = Quaternion.Euler(90, 0, 0);
+                        Instantiate(cookedVisual, newPos, rotation);
                         Debug.Log("LOG BA3D");
                         isProcessing = false;
                     }
@@ -95,9 +97,11 @@ public class Meat : BaseIngredient
 
         private void UpdateVisual()
         {
+            /*
             rawVisual.SetActive(currentState == IngredientState.Raw);
             cutVisual.SetActive(currentState == IngredientState.Cut);
             cookedVisual.SetActive(currentState == IngredientState.Cooked);
             burnedVisual.SetActive(currentState == IngredientState.Burned);
+            */
         }
     }
