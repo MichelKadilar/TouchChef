@@ -40,38 +40,60 @@ namespace Script.Ingredients
         // This method is called to slice the tomato
         public void Slice(Vector2 position, Camera camera, BaseIngredient ingredient)
         {
-            Debug.Log("WAAAAAAAAAA : Slicing tomato!");
+            Debug.Log("Slicing tomato!");
             if (currentState == IngredientState.Raw)
             {
                 // Check if the slider has been instantiated
                 if (sliderInstance == null)
                 {
-                    // Position the slider in the middle of the screen (camera view center)
-                    
-                    Vector3 rawPosition = camera.ViewportToWorldPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
-    
+                    // Set the screen position for the slider with z = 10
+                    Vector3 screenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
+                    Debug.Log($"Screen position: {screenPos}");
+
                     // Instantiate the slider prefab at this position
-                    sliderInstance = Instantiate(sliderPrefab, rawPosition, Quaternion.identity);
-                    
+                    sliderInstance = Instantiate(sliderPrefab, screenPos, Quaternion.identity);
+
+                    // Set the slider as a child of the Canvas (to ensure it appears in UI space)
+                    Canvas sliderCanvas = sliderInstance.GetComponentInParent<Canvas>();
+                    if (sliderCanvas != null)
+                    {
+                        sliderCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+
+                        // Get the CanvasScaler and configure it
+                        CanvasScaler scaler = sliderCanvas.GetComponent<CanvasScaler>();
+                        if (scaler != null)
+                        {
+                            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                            scaler.referenceResolution = new Vector2(1920, 1080); // Set the reference resolution
+                            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+                            scaler.matchWidthOrHeight = 0.5f; // Adjust this value as needed
+                        }
+                    }
+
                     // Get the Slider component and set max and initial values
                     slider = sliderInstance.GetComponentInChildren<Slider>();
                     slider.maxValue = neededSlices;
                     slider.value = currentSlice;
                 }
 
+                // Update the slider's position each time it slices
+                Vector3 updatedScreenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
+                sliderInstance.transform.position = updatedScreenPos;
 
-                
                 currentSlice++;
                 slider.value = currentSlice;
-                Debug.Log($"WAAAAAAAA : Sliced tomato! Current slice: {currentSlice}");
-                
+                Debug.Log($"Sliced tomato! Current slice: {currentSlice}");
+
                 if (currentSlice == neededSlices)
                 {
-                    Debug.Log("WAAAAAAAAAA : Sliced all slices!");
+                    Debug.Log("All slices completed!");
                     CompleteProcessing(ProcessType.Cut, position, camera, ingredient);
                 }
             }
         }
+
+
+
 
         protected void CompleteProcessing(ProcessType processType, Vector2 position, Camera camera, BaseIngredient ingredient)
         {
