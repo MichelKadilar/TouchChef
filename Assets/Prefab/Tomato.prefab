@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5524560096256505368}
   - component: {fileID: 3151719163591571295}
   m_Layer: 3
-  m_Name: food_ingredient_tomato 1
+  m_Name: Tomato
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -140,7 +140,7 @@ MonoBehaviour:
   holdDuration: 1
   holdRadius: 50
   debugMode: 1
-  holdIndicatorPrefab: {fileID: 458705955363178892, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
+  holdIndicatorPrefab: {fileID: 8695648701492483608, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
   OnHoldComplete:
     m_PersistentCalls:
       m_Calls: []

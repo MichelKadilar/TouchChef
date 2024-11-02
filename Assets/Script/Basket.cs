@@ -19,9 +19,11 @@ public class Basket : MonoBehaviour
             position.y, 
             Mathf.Abs(Camera.main.transform.position.z + 10)
         ));
-    
-        GameObject ingredient = Instantiate(ingredientPrefab, worldPosition, Quaternion.identity);
-        Debug.Log($"Created ingredient: {ingredient.name} at position {worldPosition}");
+        
+        Quaternion rotation = Quaternion.Euler(0f, 180f, 0f);
+
+        GameObject ingredient = Instantiate(ingredientPrefab, worldPosition, rotation);
+        Debug.Log($"Created ingredient: {ingredient.name} at position {worldPosition} with Y rotation 180");
     
         if (ingredient.TryGetComponent<IPickable>(out var pickable))
         {
