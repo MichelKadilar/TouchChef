@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allowedProcesses: 01000000
   processingTime: 3
-  sliderPrefab: {fileID: 5193961890216719385, guid: 6d435134685c4404da3aa113e5ea0fb3, type: 3}
+  sliderPrefab: {fileID: 2719081739067188247, guid: 176bb6681cd194f81b74ccf6e73ed6f1, type: 3}
   neededSlices: 4
   rawVisual: {fileID: 919132149155446097, guid: ce1f4bd487a0a6a4690fbcf346b04b9b, type: 3}
   cutVisual: {fileID: 3741537667912801475, guid: 90615286548f7cd4c8a3880601da8b03, type: 3}
