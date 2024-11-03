@@ -115,7 +115,9 @@ public class TouchManager : MonoBehaviour
                 }
                 
                 var ingredient = hit.collider.GetComponent<BaseIngredient>();
+                var container = hit.collider.GetComponent<BaseContainer>();
                 var pickable = hit.collider.GetComponent<IPickable>();
+                
                 if (ingredient != null)
                 {
                     if (ingredient.GetCurrentWorkStation() != null)
@@ -132,7 +134,6 @@ public class TouchManager : MonoBehaviour
                     else
                     {
                         Debug.Log($"Picking up ingredient: {ingredient.name}");
-                        pickable = ingredient.GetComponent<IPickable>();
                         if (pickable != null)
                         {
                             pickable.OnTouchPick(touchId);
@@ -140,11 +141,32 @@ public class TouchManager : MonoBehaviour
                         }
                     }
                 }
-                
-                pickable = hit.collider.GetComponent<IPickable>();
-                if (pickable != null && !pickable.IsBeingDragged)
+                else if (container != null)
                 {
-                    Debug.Log($"Picking up object: {hit.collider.name}");
+                    if (container.GetCurrentWorkStation() != null)
+                    {
+                        var holdDetector = container.GetComponent<HoldDetector>();
+                        if (holdDetector != null)
+                        {
+                            Debug.Log($"Starting hold on container: {container.name}");
+                            holdDetector.StartHolding(touchId, position);
+                            touchInfos[touchId].isHolding = true;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log($"Picking up container: {container.name}");
+                        if (pickable != null)
+                        {
+                            pickable.OnTouchPick(touchId);
+                            return;
+                        }
+                    }
+                }
+                else if (pickable != null && !pickable.IsBeingDragged)
+                {
+                    Debug.Log($"Picking up other object: {hit.collider.name}");
                     pickable.OnTouchPick(touchId);
                     return;
                 }

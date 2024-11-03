@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class BaseContainer : PickableObject, IContainer
 {
-    [SerializeField] protected UnityEngine.Transform ingredientAttachPoint;  // Spécifié explicitement
+    [SerializeField] protected UnityEngine.Transform ingredientAttachPoint;
     [SerializeField] protected int maxIngredients = 1;
     
     protected List<BaseIngredient> contents = new List<BaseIngredient>();
@@ -64,14 +64,17 @@ public abstract class BaseContainer : PickableObject, IContainer
         return new List<BaseIngredient>(contents);
     }
 
-    public UnityEngine.Transform GetIngredientAttachPoint()  // Spécifié explicitement
+    public UnityEngine.Transform GetIngredientAttachPoint()
     {
         return ingredientAttachPoint;
     }
 
-    public override void OnTouchMove(int touchId, Vector3 position)
+    public override void OnTouchPick(int touchId)
     {
-        base.OnTouchMove(touchId, position);
-        // Les ingrédients suivent automatiquement grâce au parenting
+        if (holdDetector != null && !holdDetector.IsHolding)
+        {
+            return;
+        }
+        base.OnTouchPick(touchId);
     }
 }

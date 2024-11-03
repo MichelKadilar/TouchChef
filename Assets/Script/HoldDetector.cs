@@ -26,6 +26,7 @@ public class HoldDetector : MonoBehaviour
     private BaseIngredient ingredient;
     private IContainer container;
     private Camera mainCamera;
+    public bool IsHolding => isHolding;
     
 
     private void Awake()
@@ -49,8 +50,7 @@ public class HoldDetector : MonoBehaviour
      public void StartHolding(int touchId, Vector2 position)
     {
         if (debugMode) Debug.Log($"StartHolding called on {gameObject.name} with touchId {touchId}");
-    
-        // Check for double-tap and slicing for ingredients
+        
         if (ingredient != null)
         {
             if (Input.touchCount == 2 && ingredient is Tomato tomato) 
@@ -65,15 +65,13 @@ public class HoldDetector : MonoBehaviour
                 return;
             }
         }
-        
-        // Prevent multiple simultaneous holds
+
         if (isHolding || currentTouchId.HasValue)
         {
             if (debugMode) Debug.Log($"Hold failed: Already holding or touch assigned on {gameObject.name}");
             return;
         }
 
-        // Get the workstation and check if touch is within bounds
         WorkStation workStation = null;
         if (ingredient != null)
         {
@@ -94,7 +92,6 @@ public class HoldDetector : MonoBehaviour
         }
         else
         {
-            // Assuming workstation has a Collider2D component for boundary checks
             Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
             if (workStationCollider != null)
             {
@@ -133,11 +130,9 @@ public class HoldDetector : MonoBehaviour
             Debug.LogError($"HoldDetector on {gameObject.name}: mainCamera is null!");
             return;
         }
-
-        // Nettoyer l'ancien indicateur
+        
         CleanupIndicator();
-
-        // Calculer la position monde pour l'indicateur
+        
         Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
         worldPosition.z = transform.position.z - 0.1f;
     
@@ -145,10 +140,8 @@ public class HoldDetector : MonoBehaviour
     
         try
         {
-            // Créer le nouvel indicateur
             indicatorInstance = Instantiate(holdIndicatorPrefab, worldPosition, Quaternion.identity);
             
-            // Chercher le HoldIndicator dans les enfants (sur le Quad)
             holdIndicator = indicatorInstance.GetComponentInChildren<HoldIndicator>();
             
             if (holdIndicator == null)
@@ -157,8 +150,7 @@ public class HoldDetector : MonoBehaviour
                 Destroy(indicatorInstance);
                 return;
             }
-
-            // Ajuster l'échelle
+            
             float desiredScale = 0.5f;
             indicatorInstance.transform.localScale = new Vector3(desiredScale, desiredScale, desiredScale);
         
@@ -174,7 +166,7 @@ public class HoldDetector : MonoBehaviour
     {
         if (indicatorInstance != null)
         {
-            holdIndicator = null;  // Clear reference before destroying
+            holdIndicator = null;
             Destroy(indicatorInstance);
             indicatorInstance = null;
         }
@@ -187,7 +179,6 @@ public class HoldDetector : MonoBehaviour
         
         while (isHolding && currentHoldTime < holdDuration)
         {
-            // Vérifier la validité de l'indicateur
             if (indicatorInstance == null || holdIndicator == null)
             {
                 Debug.LogWarning($"Lost indicator during hold on {gameObject.name}, recreating...");

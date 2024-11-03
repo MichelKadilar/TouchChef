@@ -10,16 +10,14 @@ public class TableStation : WorkStation
         if (!acceptAllObjects) return base.TryPlaceIngredient(obj);
 
         Debug.Log($"Table attempting to accept object: {obj.name}");
-
-        // Vérifier si l'emplacement est déjà occupé
+        
         if (HasIngredient() && currentObject != obj)
         {
             Debug.Log($"Table is occupied by different object: {currentObject.name}");
             ShowInvalidPlacement();
             return false;
         }
-
-        // Accepter n'importe quel objet qui est soit un BaseIngredient soit un IContainer
+        
         var isIngredient = obj.GetComponent<BaseIngredient>();
         var isContainer = obj.GetComponent<IContainer>();
 
@@ -29,18 +27,15 @@ public class TableStation : WorkStation
             ShowInvalidPlacement();
             return false;
         }
-
-        // Placer l'objet à la position de la table
+        
         obj.transform.position = ingredientPosition.position;
         obj.transform.rotation = ingredientPosition.rotation;
-
-        // Mettre à jour les références
+        
         currentObject = obj;
         currentProcessable = isIngredient;
         currentContainer = isContainer;
         isOccupied = true;
         
-        // Configurer l'objet avec sa nouvelle workstation
         var pickable = obj.GetComponent<PickableObject>();
         if (pickable != null)
         {

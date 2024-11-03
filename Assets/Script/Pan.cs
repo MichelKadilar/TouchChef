@@ -5,6 +5,7 @@ public class Pan : BaseContainer
     [SerializeField] private ProcessType supportedCookingType = ProcessType.Cook;
     private Vector3 lastValidPosition;
     private Quaternion lastValidRotation;
+    private WorkStation lastWorkStation;
 
     protected override void Awake()
     {
@@ -15,27 +16,30 @@ public class Pan : BaseContainer
 
     public override void OnTouchPick(int touchId)
     {
-        // Sauvegarder la position avant le déplacement
+        if (!holdDetector.IsHolding)
+        {
+            return;
+        }
+        
         lastValidPosition = transform.position;
         lastValidRotation = transform.rotation;
+        lastWorkStation = GetCurrentWorkStation();
         base.OnTouchPick(touchId);
     }
 
     public override void OnPickFailed()
     {
-        var currentStation = GetCurrentWorkStation();
-        // Si la poêle était sur une workstation, on la remet à sa dernière position valide
-        if (currentStation != null)
+        if (lastWorkStation != null)
         {
             transform.position = lastValidPosition;
             transform.rotation = lastValidRotation;
+            lastWorkStation.TryPlaceIngredient(gameObject);
         }
         else
         {
             base.OnPickFailed();
         }
     }
-
     public ProcessType GetSupportedCookingType()
     {
         return supportedCookingType;
