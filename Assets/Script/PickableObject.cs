@@ -95,6 +95,13 @@ public class PickableObject : MonoBehaviour, IPickable
             ownCollider.enabled = true;
         }
 
+        if (IsOverTrash(hits))
+        {
+            Debug.Log($"Dropping {gameObject.name} in trash - destroying object");
+            Destroy(gameObject);
+            return true;
+        }
+
         bool foundWorkstation = false;
         foreach (var hit in hits)
         {
@@ -147,6 +154,18 @@ public class PickableObject : MonoBehaviour, IPickable
         Debug.Log($"Object is from basket or has no previous workstation, destroying {gameObject.name}");
         Destroy(gameObject);
         return true;
+    }
+
+    private bool IsOverTrash(RaycastHit[] hits)
+    {
+        foreach (var hit in hits)
+        {
+            if (hit.collider.CompareTag("Trash"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void SetCurrentWorkStation(WorkStation station)
