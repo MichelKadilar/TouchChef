@@ -113,13 +113,15 @@ public class Meat : BaseIngredient
         protected void CompleteProcessingCut(Vector2 position, Camera camera, BaseIngredient ingredient)
         {
             currentState = IngredientState.Cut;
+
+            WorkStation ws = ingredient.GetCurrentWorkStation();
             
             Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
             Quaternion rotation = Quaternion.Euler(-90, 0, 0); 
-            Instantiate(cutVisual, rawPosition, rotation);
+            GameObject go =  Instantiate(cutVisual, rawPosition, rotation);
 
+            go.AddComponent(this.GetType());
            
-            ingredient.gameObject.SetActive(false);
             Debug.Log("Meat sliced!");
             
             if (sliderInstance != null)
