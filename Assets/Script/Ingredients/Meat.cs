@@ -121,6 +121,8 @@ public class Meat : BaseIngredient
             GameObject go =  Instantiate(cutVisual, rawPosition, rotation);
 
             go.AddComponent(this.GetType());
+            
+            Destroy(this);
            
             Debug.Log("Meat sliced!");
             
