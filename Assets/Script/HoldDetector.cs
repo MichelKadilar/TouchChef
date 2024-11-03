@@ -110,6 +110,20 @@ public class HoldDetector : MonoBehaviour
         }
 
         if (debugMode) Debug.Log($"Starting hold process on {gameObject.name}");
+        
+        if (ingredient is Tomato tomato1 && tomato1.sliderInstance != null)
+        {
+            Destroy(tomato1.sliderInstance);
+            tomato1.sliderInstance = null;
+            Debug.Log("Slider destroyed at start of hold");
+        }
+        
+        if (ingredient is Meat meat1 && meat1.sliderInstance != null)
+        {
+            Destroy(meat1.sliderInstance);
+            meat1.sliderInstance = null;
+            Debug.Log("Slider destroyed at start of hold");
+        }
 
         currentTouchId = touchId;
         holdStartPosition = position;

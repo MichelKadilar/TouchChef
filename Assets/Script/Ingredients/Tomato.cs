@@ -21,7 +21,7 @@ namespace Script.Ingredients
         private int currentSlice = 0; // Current slice count
         
         private GameObject instantiatedCutTomato; // To hold the instantiated cut visual
-        private GameObject sliderInstance; // To hold the instantiated slider
+        internal GameObject sliderInstance; // To hold the instantiated slider
 
         protected override void Awake()
         {

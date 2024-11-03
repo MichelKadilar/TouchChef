@@ -22,8 +22,8 @@ public class Meat : BaseIngredient
     
         private Slider slider; // Reference to the slider
         private int currentSlice = 0; // Current slice count
-    
-        private GameObject sliderInstance; // To hold the instantiated slider
+
+        internal GameObject sliderInstance; // To hold the instantiated slider
 
         [Header("Cooking Options")]
         [SerializeField] private float burnTime = 6f; // Double the normal cooking time
