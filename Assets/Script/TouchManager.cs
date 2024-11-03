@@ -240,6 +240,11 @@ public class TouchManager : MonoBehaviour
             {
                 holdDetector.StopHolding();
             }
+            
+            if (ingredient.CanProcess(ProcessType.Cook) && ingredient.GetCurrentWorkStation().GetStationType() == ProcessType.Cook)
+            {
+                ingredient.Process(ProcessType.Cook);
+            }
         }
 
         activeTouches.Remove(touchId);

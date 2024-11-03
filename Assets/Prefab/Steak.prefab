@@ -130,7 +130,7 @@ MonoBehaviour:
   processingTime: 3
   rawVisual: {fileID: 919132149155446097, guid: 158aa02651ec29e46a570caf86750f5b, type: 3}
   cutVisual: {fileID: 7891238555950347608, guid: 4238823a9875a4ed799d5be6a2b6bff9, type: 3}
-  cookedVisual: {fileID: 919132149155446097, guid: 5122cd1cb5703a04795b759140129bdd, type: 3}
+  cookedVisual: {fileID: 7422891026951385569, guid: 30efe535bef7ed2d1ac52dfbffa92a82, type: 3}
   burnedVisual: {fileID: 919132149155446097, guid: 65bdb8b93d79b0f4180ea4e4494ce710, type: 3}
   sliderPrefabRight: {fileID: 3455389141338400390, guid: 176bb6681cd194f81b74ccf6e73ed6f1, type: 3}
   sliderPrefabLeft: {fileID: 3455389141338400390, guid: 826e6e05372e74840afe55ebe10f178e, type: 3}

@@ -83,7 +83,7 @@ public class WorkStation : MonoBehaviour
         
         if (isOccupied && currentObject != obj)
         {
-            Debug.Log($"Workstation {gameObject.name} is occupied by different object");
+            Debug.Log($"Workstation {gameObject.name} is occupied by different object {currentObject.name}");
             ShowInvalidPlacement();
             return false;
         }
@@ -128,6 +128,12 @@ public class WorkStation : MonoBehaviour
             return false;
         }
         
+        if (this.stationType == ProcessType.Cook)
+        {
+            StartProcessing();
+            return true;
+        }
+
         if (processable != null)
         {
             if (!processable.CanProcess(stationType))
@@ -138,8 +144,10 @@ public class WorkStation : MonoBehaviour
             }
 
             PlaceObject(obj, processable, null);
+            Debug.Log("EDITINGTEOHAEJUOGIFHA{}FUJFHEA{FUIHEA");
             return true;
         }
+        
 
         Debug.Log($"Object {obj.name} cannot be placed here");
         ShowInvalidPlacement();
@@ -208,6 +216,8 @@ public class WorkStation : MonoBehaviour
             }
             return;
         }
+        
+        Debug.Log($"TESTESTESTETSAOTHEUIYARGEAOIKR {currentProcessable.CanStartProcessing(stationType)}");
 
         if (currentProcessable != null && currentProcessable.CanStartProcessing(stationType))
         {
@@ -292,5 +302,10 @@ public class WorkStation : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(ingredientPosition.position, processRadius);
         }
+    }
+    
+    public Transform GetIngredientPosition()
+    {
+        return ingredientPosition;
     }
 }
