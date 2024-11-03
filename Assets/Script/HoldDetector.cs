@@ -24,17 +24,22 @@ public class HoldDetector : MonoBehaviour
     private int? currentTouchId;
     private Vector2 holdStartPosition;
     private BaseIngredient ingredient;
+    private IContainer container;
     private Camera mainCamera;
+    public bool IsHolding => isHolding;
     
 
     private void Awake()
     {
         ingredient = GetComponent<BaseIngredient>();
-        if (ingredient == null)
+        container = GetComponent<IContainer>();
+        
+        if (ingredient == null && container == null)
         {
-            Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient component!");
+            Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient or IContainer component!");
             return;
         }
+        
         mainCamera = Camera.main;
         if (mainCamera == null)
         {
@@ -42,55 +47,66 @@ public class HoldDetector : MonoBehaviour
         }
     }
 
-    public void StartHolding(int touchId, Vector2 position)
+     public void StartHolding(int touchId, Vector2 position)
     {
         if (debugMode) Debug.Log($"StartHolding called on {gameObject.name} with touchId {touchId}");
-    
-        // Check for double-tap and slicing
-        if (Input.touchCount == 2 && ingredient is Tomato tomato) 
-        {
-            tomato.Slice(position,mainCamera,ingredient);
-            return;
-        }
         
-        if(Input.touchCount == 2 && ingredient is Meat meat)
+        if (ingredient != null)
         {
-            meat.Slice(position,mainCamera,ingredient);
-            return;
+            if (Input.touchCount == 2 && ingredient is Tomato tomato) 
+            {
+                tomato.Slice(position, mainCamera, ingredient);
+                return;
+            }
+            
+            if(Input.touchCount == 2 && ingredient is Meat meat)
+            {
+                meat.Slice(position, mainCamera, ingredient);
+                return;
+            }
         }
-        
-        // Prevent multiple simultaneous holds
+
         if (isHolding || currentTouchId.HasValue)
         {
             if (debugMode) Debug.Log($"Hold failed: Already holding or touch assigned on {gameObject.name}");
             return;
         }
 
-        // Get the workstation and check if touch is within bounds
-        var workStation = ingredient.GetCurrentWorkStation();
-        if (workStation == null)
+        WorkStation workStation = null;
+        if (ingredient != null)
         {
-            if (debugMode) Debug.Log($"Hold failed: No workstation for {gameObject.name}");
-            return;
+            workStation = ingredient.GetCurrentWorkStation();
+        }
+        else if (container != null)
+        {
+            var pickable = container as PickableObject;
+            if (pickable != null)
+            {
+                workStation = pickable.GetCurrentWorkStation();
+            }
         }
 
-        // Assuming workstation has a Collider2D component for boundary checks
-        Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
-        if (workStationCollider != null)
+        if (workStation == null)
         {
-            // Convert screen touch position to world position
-            Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
-        
-            if (!workStationCollider.bounds.Contains(worldPosition))
+            if (debugMode) Debug.Log($"No workstation for {gameObject.name}, allowing hold");
+        }
+        else
+        {
+            Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
+            if (workStationCollider != null)
             {
-                if (debugMode) Debug.Log($"Hold failed: Touch outside workstation bounds for {gameObject.name}");
-                return;
+                Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
+                
+                if (!workStationCollider.bounds.Contains(worldPosition))
+                {
+                    if (debugMode) Debug.Log($"Hold failed: Touch outside workstation bounds for {gameObject.name}");
+                    return;
+                }
             }
         }
 
         if (debugMode) Debug.Log($"Starting hold process on {gameObject.name}");
 
-        // Initialize holding variables and start hold process
         currentTouchId = touchId;
         holdStartPosition = position;
         isHolding = true;
@@ -114,11 +130,9 @@ public class HoldDetector : MonoBehaviour
             Debug.LogError($"HoldDetector on {gameObject.name}: mainCamera is null!");
             return;
         }
-
-        // Nettoyer l'ancien indicateur
+        
         CleanupIndicator();
-
-        // Calculer la position monde pour l'indicateur
+        
         Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
         worldPosition.z = transform.position.z - 0.1f;
     
@@ -126,10 +140,8 @@ public class HoldDetector : MonoBehaviour
     
         try
         {
-            // Créer le nouvel indicateur
             indicatorInstance = Instantiate(holdIndicatorPrefab, worldPosition, Quaternion.identity);
             
-            // Chercher le HoldIndicator dans les enfants (sur le Quad)
             holdIndicator = indicatorInstance.GetComponentInChildren<HoldIndicator>();
             
             if (holdIndicator == null)
@@ -138,8 +150,7 @@ public class HoldDetector : MonoBehaviour
                 Destroy(indicatorInstance);
                 return;
             }
-
-            // Ajuster l'échelle
+            
             float desiredScale = 0.5f;
             indicatorInstance.transform.localScale = new Vector3(desiredScale, desiredScale, desiredScale);
         
@@ -155,7 +166,7 @@ public class HoldDetector : MonoBehaviour
     {
         if (indicatorInstance != null)
         {
-            holdIndicator = null;  // Clear reference before destroying
+            holdIndicator = null;
             Destroy(indicatorInstance);
             indicatorInstance = null;
         }
@@ -168,7 +179,6 @@ public class HoldDetector : MonoBehaviour
         
         while (isHolding && currentHoldTime < holdDuration)
         {
-            // Vérifier la validité de l'indicateur
             if (indicatorInstance == null || holdIndicator == null)
             {
                 Debug.LogWarning($"Lost indicator during hold on {gameObject.name}, recreating...");
