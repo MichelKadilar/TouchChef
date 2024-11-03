@@ -114,6 +114,14 @@ public class TouchManager : MonoBehaviour
                     return;
                 }
                 
+                var plateStack = hit.collider.GetComponent<PlateStack>();
+                if (plateStack != null)
+                {
+                    Debug.Log($"PlateStack touched: {plateStack.name}");
+                    plateStack.OnTouchDown(touchId, position);
+                    return;
+                }
+                
                 var ingredient = hit.collider.GetComponent<BaseIngredient>();
                 var container = hit.collider.GetComponent<BaseContainer>();
                 var pickable = hit.collider.GetComponent<IPickable>();
