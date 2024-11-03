@@ -7,6 +7,7 @@ public class WorkStation : MonoBehaviour
     [SerializeField] private ProcessType stationType;
     [SerializeField] public Transform ingredientPosition;
     [SerializeField] private float processRadius = 1f;
+    [SerializeField] public WorkStationPosition workStationPosition;
     
     [Header("Cooking Station Settings")]
     [SerializeField] private bool isCookingStation;

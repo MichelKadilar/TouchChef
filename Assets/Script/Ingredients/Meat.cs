@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class Meat : BaseIngredient
@@ -11,8 +12,10 @@ public class Meat : BaseIngredient
         [SerializeField] private GameObject cookedVisual;
         [SerializeField] private GameObject burnedVisual;
         
+       
         [Header("Slider")]
-        [SerializeField] private GameObject sliderPrefab; // Prefab for the slider
+        [SerializeField] private GameObject sliderPrefabRight; // Prefab for the slider
+        [SerializeField] private GameObject sliderPrefabLeft; // Prefab for the slider
         
         [Header("Slice Options")]
         public int neededSlices = 5; // Number of slices needed to complete slicing
@@ -42,7 +45,7 @@ public class Meat : BaseIngredient
         // Method to handle slicing
         public void Slice(Vector2 position, Camera camera, BaseIngredient ingredient)
         {
-            Debug.Log("WAAA : Slicing meat!");
+            Debug.Log("Slicing meat!");
             
             if (currentState == IngredientState.Raw)
             {
@@ -52,9 +55,20 @@ public class Meat : BaseIngredient
                     // Set the screen position for the slider with z = 10
                     Vector3 screenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
                     Debug.Log($"Screen position: {screenPos}");
+                    
+                    if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.RIGHT)
+                    {
+                        // Instantiate the slider prefab at this position
+                        sliderInstance = Instantiate(sliderPrefabRight, screenPos, Quaternion.identity); 
+                    }
+                    else if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.LEFT)
+                    {
+                        // Instantiate the slider prefab at this position
+                        sliderInstance = Instantiate(sliderPrefabLeft, screenPos, Quaternion.identity); 
+                    }
+                    
 
-                    // Instantiate the slider prefab at this position
-                    sliderInstance = Instantiate(sliderPrefab, screenPos, Quaternion.identity);
+                    
 
                     // Set the slider as a child of the Canvas (to ensure it appears in UI space)
                     Canvas sliderCanvas = sliderInstance.GetComponentInParent<Canvas>();
@@ -98,9 +112,6 @@ public class Meat : BaseIngredient
         protected void CompleteProcessingCut(Vector2 position, Camera camera, BaseIngredient ingredient)
         {
             currentState = IngredientState.Cut;
-            allowedProcesses.Clear();
-            allowedProcesses.Add(ProcessType.Cook);
-
             
             Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
             Quaternion rotation = Quaternion.Euler(-90, 0, 0); 
@@ -115,6 +126,8 @@ public class Meat : BaseIngredient
                 Destroy(sliderInstance);
             }
             
+            allowedProcesses.Clear();
+            allowedProcesses.Add(ProcessType.Cook);
             UpdateVisual();
         }
 

@@ -55,12 +55,16 @@ public class HoldDetector : MonoBehaviour
         {
             if (Input.touchCount == 2 && ingredient is Tomato tomato) 
             {
+                Debug.Log("TOMATO SLICING .........");
+                Debug.Log("TOMATO WORKSTATION: " + tomato.GetCurrentWorkStation()+"\n"+ "WORKSTATION Position: "+ tomato.GetCurrentWorkStation().workStationPosition);
                 tomato.Slice(position, mainCamera, ingredient);
                 return;
             }
             
             if(Input.touchCount == 2 && ingredient is Meat meat)
             {
+                Debug.Log("MEAT SLICING .........");
+                Debug.Log("MEAT WORKSTATION: " + meat.GetCurrentWorkStation()+"\n"+ "WORKSTATION Position: "+ meat.GetCurrentWorkStation().workStationPosition);
                 meat.Slice(position, mainCamera, ingredient);
                 return;
             }

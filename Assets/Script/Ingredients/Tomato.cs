@@ -8,7 +8,8 @@ namespace Script.Ingredients
     public class Tomato : BaseIngredient
     {
         [Header("Slider")]
-        public GameObject sliderPrefab; // Prefab for the slider
+        [SerializeField] private GameObject sliderPrefabRight; // Prefab for the slider
+        [SerializeField] private GameObject sliderPrefabLeft; // Prefab for the slider
         
         [Header("Slice Options")]
         public int neededSlices = 4; // Number of slices needed to complete slicing
@@ -50,8 +51,16 @@ namespace Script.Ingredients
                     Vector3 screenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
                     Debug.Log($"Screen position: {screenPos}");
 
-                    // Instantiate the slider prefab at this position
-                    sliderInstance = Instantiate(sliderPrefab, screenPos, Quaternion.identity);
+                    if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.RIGHT)
+                    {
+                        // Instantiate the slider prefab at this position
+                        sliderInstance = Instantiate(sliderPrefabRight, screenPos, Quaternion.identity); 
+                    }
+                    else if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.LEFT)
+                    {
+                        // Instantiate the slider prefab at this position
+                        sliderInstance = Instantiate(sliderPrefabLeft, screenPos, Quaternion.identity); 
+                    }
 
                     // Set the slider as a child of the Canvas (to ensure it appears in UI space)
                     Canvas sliderCanvas = sliderInstance.GetComponentInParent<Canvas>();

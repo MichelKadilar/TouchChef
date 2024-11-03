@@ -2019,6 +2019,7 @@ MonoBehaviour:
   stationType: 2
   ingredientPosition: {fileID: 2134938059}
   processRadius: 1
+  workStationPosition: 0
   isCookingStation: 1
   panPrefab: {fileID: 399742943}
   availableVisual: {fileID: 0}
@@ -4984,6 +4985,7 @@ MonoBehaviour:
   stationType: 0
   ingredientPosition: {fileID: 1564884444}
   processRadius: 1
+  workStationPosition: 0
   isCookingStation: 0
   panPrefab: {fileID: 0}
   availableVisual: {fileID: 0}
@@ -5779,6 +5781,7 @@ MonoBehaviour:
   stationType: 1
   ingredientPosition: {fileID: 129176340}
   processRadius: 1
+  workStationPosition: 1
   isCookingStation: 0
   panPrefab: {fileID: 0}
   availableVisual: {fileID: 0}
@@ -6613,6 +6616,7 @@ MonoBehaviour:
   stationType: 2
   ingredientPosition: {fileID: 1323229086}
   processRadius: 1
+  workStationPosition: 0
   isCookingStation: 1
   panPrefab: {fileID: 399742943}
   availableVisual: {fileID: 0}
@@ -7958,6 +7962,7 @@ MonoBehaviour:
   stationType: 0
   ingredientPosition: {fileID: 2070028532}
   processRadius: 1
+  workStationPosition: 0
   isCookingStation: 0
   panPrefab: {fileID: 0}
   availableVisual: {fileID: 0}
@@ -8093,6 +8098,7 @@ MonoBehaviour:
   stationType: 1
   ingredientPosition: {fileID: 2070028532}
   processRadius: 1
+  workStationPosition: 0
   isCookingStation: 0
   panPrefab: {fileID: 0}
   availableVisual: {fileID: 0}
