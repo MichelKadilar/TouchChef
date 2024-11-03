@@ -24,17 +24,21 @@ public class HoldDetector : MonoBehaviour
     private int? currentTouchId;
     private Vector2 holdStartPosition;
     private BaseIngredient ingredient;
+    private IContainer container;
     private Camera mainCamera;
     
 
     private void Awake()
     {
         ingredient = GetComponent<BaseIngredient>();
-        if (ingredient == null)
+        container = GetComponent<IContainer>();
+        
+        if (ingredient == null && container == null)
         {
-            Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient component!");
+            Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient or IContainer component!");
             return;
         }
+        
         mainCamera = Camera.main;
         if (mainCamera == null)
         {
@@ -42,21 +46,24 @@ public class HoldDetector : MonoBehaviour
         }
     }
 
-    public void StartHolding(int touchId, Vector2 position)
+     public void StartHolding(int touchId, Vector2 position)
     {
         if (debugMode) Debug.Log($"StartHolding called on {gameObject.name} with touchId {touchId}");
     
-        // Check for double-tap and slicing
-        if (Input.touchCount == 2 && ingredient is Tomato tomato) 
+        // Check for double-tap and slicing for ingredients
+        if (ingredient != null)
         {
-            tomato.Slice(position,mainCamera,ingredient);
-            return;
-        }
-        
-        if(Input.touchCount == 2 && ingredient is Meat meat)
-        {
-            meat.Slice(position,mainCamera,ingredient);
-            return;
+            if (Input.touchCount == 2 && ingredient is Tomato tomato) 
+            {
+                tomato.Slice(position, mainCamera, ingredient);
+                return;
+            }
+            
+            if(Input.touchCount == 2 && ingredient is Meat meat)
+            {
+                meat.Slice(position, mainCamera, ingredient);
+                return;
+            }
         }
         
         // Prevent multiple simultaneous holds
@@ -67,30 +74,42 @@ public class HoldDetector : MonoBehaviour
         }
 
         // Get the workstation and check if touch is within bounds
-        var workStation = ingredient.GetCurrentWorkStation();
-        if (workStation == null)
+        WorkStation workStation = null;
+        if (ingredient != null)
         {
-            if (debugMode) Debug.Log($"Hold failed: No workstation for {gameObject.name}");
-            return;
+            workStation = ingredient.GetCurrentWorkStation();
+        }
+        else if (container != null)
+        {
+            var pickable = container as PickableObject;
+            if (pickable != null)
+            {
+                workStation = pickable.GetCurrentWorkStation();
+            }
         }
 
-        // Assuming workstation has a Collider2D component for boundary checks
-        Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
-        if (workStationCollider != null)
+        if (workStation == null)
         {
-            // Convert screen touch position to world position
-            Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
-        
-            if (!workStationCollider.bounds.Contains(worldPosition))
+            if (debugMode) Debug.Log($"No workstation for {gameObject.name}, allowing hold");
+        }
+        else
+        {
+            // Assuming workstation has a Collider2D component for boundary checks
+            Collider2D workStationCollider = workStation.GetComponent<Collider2D>();
+            if (workStationCollider != null)
             {
-                if (debugMode) Debug.Log($"Hold failed: Touch outside workstation bounds for {gameObject.name}");
-                return;
+                Vector3 worldPosition = mainCamera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
+                
+                if (!workStationCollider.bounds.Contains(worldPosition))
+                {
+                    if (debugMode) Debug.Log($"Hold failed: Touch outside workstation bounds for {gameObject.name}");
+                    return;
+                }
             }
         }
 
         if (debugMode) Debug.Log($"Starting hold process on {gameObject.name}");
 
-        // Initialize holding variables and start hold process
         currentTouchId = touchId;
         holdStartPosition = position;
         isHolding = true;

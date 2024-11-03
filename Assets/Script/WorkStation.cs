@@ -5,7 +5,7 @@ public class WorkStation : MonoBehaviour
 {
     [Header("Configuration")]
     [SerializeField] private ProcessType stationType;
-    [SerializeField] private Transform ingredientPosition;
+    [SerializeField] public Transform ingredientPosition;
     [SerializeField] private float processRadius = 1f;
     
     [Header("Cooking Station Settings")]
@@ -13,8 +13,8 @@ public class WorkStation : MonoBehaviour
     [SerializeField] private GameObject panPrefab;
     
     [Header("Visual Feedback")]
-    [SerializeField] private GameObject availableVisual;
-    [SerializeField] private GameObject processingVisual;
+    [SerializeField] public GameObject availableVisual;
+    [SerializeField] public GameObject processingVisual;
     [SerializeField] private GameObject invalidPlacementVisual;
     
     [Header("Events")]
@@ -23,11 +23,12 @@ public class WorkStation : MonoBehaviour
     public UnityEvent OnIngredientPlaced = new UnityEvent();
     public UnityEvent OnIngredientRemoved = new UnityEvent();
 
-    private bool isOccupied = false;
-    private GameObject currentIngredient = null;
-    private BaseIngredient currentProcessable = null;
-    private bool isProcessing = false;
-    private Pan attachedPan = null;
+    public bool isOccupied = false;
+    public GameObject currentObject = null;
+    public BaseIngredient currentProcessable = null;
+    public IContainer currentContainer = null;
+    public bool isProcessing = false;
+    public Pan attachedPan = null;
 
     private void Start()
     {
@@ -45,16 +46,17 @@ public class WorkStation : MonoBehaviour
         
         if (attachedPan != null)
         {
-            // Désactiver le HoldDetector au début puisque la poêle est attachée
-            var holdDetector = panObject.GetComponent<HoldDetector>();
-            if (holdDetector != null)
-            {
-                holdDetector.enabled = false;
-            }
-            
             // Configurer la poêle comme l'ingrédient actuel
-            currentIngredient = panObject;
+            currentObject = panObject;
+            currentContainer = attachedPan;
             isOccupied = true;
+            
+            // Configurer la workstation pour la poêle
+            var pickable = panObject.GetComponent<PickableObject>();
+            if (pickable != null)
+            {
+                pickable.SetCurrentWorkStation(this);
+            }
         }
         else
         {
@@ -63,19 +65,29 @@ public class WorkStation : MonoBehaviour
         }
     }
 
-    public bool TryPlaceIngredient(GameObject ingredient)
+    public virtual bool TryPlaceIngredient(GameObject obj)
     {
-        Debug.Log($"Attempting to place {ingredient.name} on workstation {gameObject.name} of type {stationType}");
+        Debug.Log($"Attempting to place {obj.name} on workstation {gameObject.name} of type {stationType}");
 
-        // Si c'est une station de cuisson avec une poêle
+        if (isOccupied && currentObject != obj)
+        {
+            Debug.Log($"Workstation {gameObject.name} is occupied by different object");
+            ShowInvalidPlacement();
+            return false;
+        }
+
+        // Vérifier si c'est un ingrédient ou un contenant
+        var processable = obj.GetComponent<BaseIngredient>();
+        var container = obj.GetComponent<IContainer>();
+
+        // Si c'est une station de cuisson avec une poêle attachée
         if (isCookingStation && attachedPan != null)
         {
-            var baseIngredient = ingredient.GetComponent<BaseIngredient>();
-            if (baseIngredient != null)
+            if (processable != null)
             {
-                if (attachedPan.CanAcceptIngredient(baseIngredient))
+                if (attachedPan.CanAcceptIngredient(processable))
                 {
-                    bool success = attachedPan.AddIngredient(baseIngredient);
+                    bool success = attachedPan.AddIngredient(processable);
                     if (success)
                     {
                         OnIngredientPlaced?.Invoke();
@@ -87,52 +99,88 @@ public class WorkStation : MonoBehaviour
             }
         }
 
-        // Comportement standard pour les autres stations
-        if (isOccupied && currentIngredient != ingredient)
+        // Gestion des contenants (poêles mobiles)
+        if (container != null)
         {
-            Debug.Log($"Workstation {gameObject.name} is occupied by different ingredient");
+            // Si c'est une station de cuisson, on accepte les poêles
+            if (stationType == ProcessType.Cook)
+            {
+                obj.transform.position = ingredientPosition.position;
+                obj.transform.rotation = ingredientPosition.rotation;
+
+                currentObject = obj;
+                currentContainer = container;
+                isOccupied = true;
+
+                var pickable = obj.GetComponent<PickableObject>();
+                if (pickable != null)
+                {
+                    pickable.SetCurrentWorkStation(this);
+                }
+
+                OnIngredientPlaced?.Invoke();
+                UpdateVisuals();
+                return true;
+            }
+            // Les contenants peuvent aussi être placés sur des tables (stations sans type)
+            else if (stationType == 0)  // Pour les tables
+            {
+                obj.transform.position = ingredientPosition.position;
+                obj.transform.rotation = ingredientPosition.rotation;
+
+                currentObject = obj;
+                currentContainer = container;
+                isOccupied = true;
+
+                var pickable = obj.GetComponent<PickableObject>();
+                if (pickable != null)
+                {
+                    pickable.SetCurrentWorkStation(this);
+                }
+
+                OnIngredientPlaced?.Invoke();
+                UpdateVisuals();
+                return true;
+            }
             ShowInvalidPlacement();
             return false;
         }
 
-        var processable = ingredient.GetComponent<BaseIngredient>();
+        // Gestion standard des ingrédients
         if (processable != null)
         {
             if (!processable.CanProcess(stationType))
             {
-                Debug.Log($"Ingredient {ingredient.name} cannot be processed here - Type: {stationType}");
+                Debug.Log($"Ingredient {obj.name} cannot be processed here - Type: {stationType}");
                 ShowInvalidPlacement();
                 return false;
             }
-        }
-        else
-        {
-            Debug.Log($"Ingredient {ingredient.name} does not have BaseIngredient component");
-            ShowInvalidPlacement();
-            return false;
-        }
 
-        ingredient.transform.position = ingredientPosition.position;
-        ingredient.transform.rotation = ingredientPosition.rotation;
+            obj.transform.position = ingredientPosition.position;
+            obj.transform.rotation = ingredientPosition.rotation;
 
-        if (currentIngredient != ingredient)
-        {
-            currentIngredient = ingredient;
-            currentProcessable = processable;
-            isOccupied = true;
-        
-            var pickable = ingredient.GetComponent<PickableObject>();
-            if (pickable != null)
+            if (currentObject != obj)
             {
-                pickable.SetCurrentWorkStation(this);
+                currentObject = obj;
+                currentProcessable = processable;
+                isOccupied = true;
+
+                var pickable = obj.GetComponent<PickableObject>();
+                if (pickable != null)
+                {
+                    pickable.SetCurrentWorkStation(this);
+                }
+
+                OnIngredientPlaced?.Invoke();
             }
 
-            OnIngredientPlaced?.Invoke();
-            Debug.Log($"Successfully placed {ingredient.name} on workstation {gameObject.name}");
+            UpdateVisuals();
+            return true;
         }
 
-        UpdateVisuals();
-        return true;
+        Debug.Log($"Object {obj.name} cannot be placed here");
+        ShowInvalidPlacement();
+        return false;
     }
 
     protected virtual void CompleteProcessing()
@@ -153,8 +201,9 @@ public class WorkStation : MonoBehaviour
         else
         {
             isOccupied = false;
-            currentIngredient = null;
+            currentObject = null;
             currentProcessable = null;
+            currentContainer = null;
         }
         
         OnIngredientRemoved?.Invoke();
@@ -170,14 +219,21 @@ public class WorkStation : MonoBehaviour
         if (isCookingStation && attachedPan != null)
         {
             Debug.Log($"Starting cooking process with pan on {gameObject.name}");
-            attachedPan.StartCooking();
-            ShowProcessingVisual();
+            bool success = attachedPan.StartCooking();
+            if (success)
+            {
+                ShowProcessingVisual();
+            }
+            else
+            {
+                isProcessing = false;
+            }
             return;
         }
 
         if (currentProcessable != null && currentProcessable.CanStartProcessing(stationType))
         {
-            Debug.Log($"Starting processing of {currentIngredient.name} - Type: {stationType}");
+            Debug.Log($"Starting processing of {currentObject.name} - Type: {stationType}");
             currentProcessable.Process(stationType);
             ShowProcessingVisual();
         }
@@ -189,16 +245,16 @@ public class WorkStation : MonoBehaviour
         {
             return attachedPan.GetContents().Count > 0;
         }
-        return isOccupied && currentIngredient != null;
+        return isOccupied && (currentObject != null);
     }
 
-    public bool CanAcceptIngredient(BaseIngredient ingredient)
+    public virtual bool CanAcceptIngredient(BaseIngredient ingredient)
     {
         if (isCookingStation && attachedPan != null)
         {
             return attachedPan.CanAcceptIngredient(ingredient);
         }
-        return !isOccupied || currentIngredient == ingredient.gameObject;
+        return !isOccupied || currentObject == ingredient.gameObject;
     }
 
     public ProcessType GetStationType()
@@ -206,7 +262,7 @@ public class WorkStation : MonoBehaviour
         return stationType;
     }
 
-    private void ShowInvalidPlacement()
+    protected virtual void ShowInvalidPlacement()
     {
         if (invalidPlacementVisual != null)
         {
@@ -223,7 +279,7 @@ public class WorkStation : MonoBehaviour
         }
     }
 
-    private void UpdateVisuals()
+    protected virtual void UpdateVisuals()
     {
         // Pour les stations de cuisson, on considère l'occupation différemment
         bool showAvailable = isCookingStation && attachedPan != null ? 

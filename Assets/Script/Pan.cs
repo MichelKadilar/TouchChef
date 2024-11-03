@@ -3,7 +3,38 @@ using UnityEngine;
 public class Pan : BaseContainer
 {
     [SerializeField] private ProcessType supportedCookingType = ProcessType.Cook;
-    private BaseIngredient currentIngredient;
+    private Vector3 lastValidPosition;
+    private Quaternion lastValidRotation;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        lastValidPosition = transform.position;
+        lastValidRotation = transform.rotation;
+    }
+
+    public override void OnTouchPick(int touchId)
+    {
+        // Sauvegarder la position avant le déplacement
+        lastValidPosition = transform.position;
+        lastValidRotation = transform.rotation;
+        base.OnTouchPick(touchId);
+    }
+
+    public override void OnPickFailed()
+    {
+        var currentStation = GetCurrentWorkStation();
+        // Si la poêle était sur une workstation, on la remet à sa dernière position valide
+        if (currentStation != null)
+        {
+            transform.position = lastValidPosition;
+            transform.rotation = lastValidRotation;
+        }
+        else
+        {
+            base.OnPickFailed();
+        }
+    }
 
     public ProcessType GetSupportedCookingType()
     {
@@ -12,7 +43,8 @@ public class Pan : BaseContainer
 
     public override bool CanAcceptIngredient(BaseIngredient ingredient)
     {
-        return base.CanAcceptIngredient(ingredient) && ingredient.CanProcess(supportedCookingType);
+        if (!base.CanAcceptIngredient(ingredient)) return false;
+        return ingredient.CanProcess(supportedCookingType);
     }
 
     public bool StartCooking()

@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7253146347491586435}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IngredientPos
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45,7 +45,8 @@ GameObject:
   - component: {fileID: 4733010310963404739}
   - component: {fileID: 5230023125766536624}
   - component: {fileID: 814189867707748851}
-  m_Layer: 0
+  - component: {fileID: 8025634403946089073}
+  m_Layer: 3
   m_Name: Poele2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -172,3 +173,22 @@ MonoBehaviour:
   ingredientAttachPoint: {fileID: 7253146347491586435}
   maxIngredients: 1
   supportedCookingType: 2
+--- !u!114 &8025634403946089073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4754884321932202269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be56d21311e497eb26fb3211c7bd032, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 0.5
+  holdRadius: 0.5
+  debugMode: 1
+  holdIndicatorPrefab: {fileID: 8695648701492483608, guid: 1abc6d85554fa8643a695365a70577c0, type: 3}
+  OnHoldComplete:
+    m_PersistentCalls:
+      m_Calls: []
