@@ -83,7 +83,7 @@ public class WorkStation : MonoBehaviour
         
         if (isOccupied && currentObject != obj)
         {
-            Debug.Log($"Workstation {gameObject.name} is occupied by different object");
+            Debug.Log($"Workstation {gameObject.name} is occupied by different object {currentObject.name}");
             ShowInvalidPlacement();
             return false;
         }
@@ -128,6 +128,12 @@ public class WorkStation : MonoBehaviour
             return false;
         }
         
+        if (this.stationType == ProcessType.Cook)
+        {
+            StartProcessing();
+            return true;
+        }
+
         if (processable != null)
         {
             if (!processable.CanProcess(stationType))
@@ -139,13 +145,9 @@ public class WorkStation : MonoBehaviour
 
             PlaceObject(obj, processable, null);
             Debug.Log("EDITINGTEOHAEJUOGIFHA{}FUJFHEA{FUIHEA");
-        }
-        
-        if (this.stationType == ProcessType.Cook)
-        {
-            StartProcessing();
             return true;
         }
+        
 
         Debug.Log($"Object {obj.name} cannot be placed here");
         ShowInvalidPlacement();
