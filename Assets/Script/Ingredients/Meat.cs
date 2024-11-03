@@ -37,6 +37,7 @@ public class Meat : BaseIngredient
             }
             allowedProcesses.Clear();
             allowedProcesses.Add(ProcessType.Cut);
+            allowedProcesses.Add(ProcessType.Cook);
             
             base.Awake();
             UpdateVisual();
@@ -143,8 +144,19 @@ public class Meat : BaseIngredient
                 case ProcessType.Cook:
                     if (cookingTimer < burnTime)
                     {
+                        Debug.Log("WAWAWAWAWAW");
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
+                        WorkStation ws = this.GetCurrentWorkStation();
+                        Transform ingredientPosition = ws.GetIngredientPosition();
+                        Vector3 newPos = new Vector3(ingredientPosition.position.x, ingredientPosition.position.y,
+                            ingredientPosition.position.z);
+                        this.gameObject.SetActive(false);
+                        Debug.Log("LOG 9ABL");
+                        Quaternion rotation = Quaternion.Euler(90, 0, 0);
+                        Instantiate(cookedVisual, newPos, rotation);
+                        Debug.Log("LOG BA3D");
+                        isProcessing = false;
                     }
                     else
                     {
@@ -191,6 +203,7 @@ public class Meat : BaseIngredient
 
         private void UpdateVisual()
         {
+            /*
             rawVisual.SetActive(currentState == IngredientState.Raw);
             cookedVisual.SetActive(currentState == IngredientState.Cooked);
             burnedVisual.SetActive(currentState == IngredientState.Burned);
@@ -199,5 +212,6 @@ public class Meat : BaseIngredient
             {
                 Debug.Log("Cut visual instantiated!");
             }
+            */
         }
     }

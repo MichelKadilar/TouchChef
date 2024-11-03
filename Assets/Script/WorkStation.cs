@@ -138,6 +138,12 @@ public class WorkStation : MonoBehaviour
             }
 
             PlaceObject(obj, processable, null);
+            Debug.Log("EDITINGTEOHAEJUOGIFHA{}FUJFHEA{FUIHEA");
+        }
+        
+        if (this.stationType == ProcessType.Cook)
+        {
+            StartProcessing();
             return true;
         }
 
@@ -208,6 +214,8 @@ public class WorkStation : MonoBehaviour
             }
             return;
         }
+        
+        Debug.Log($"TESTESTESTETSAOTHEUIYARGEAOIKR {currentProcessable.CanStartProcessing(stationType)}");
 
         if (currentProcessable != null && currentProcessable.CanStartProcessing(stationType))
         {
@@ -292,5 +300,10 @@ public class WorkStation : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(ingredientPosition.position, processRadius);
         }
+    }
+    
+    public Transform GetIngredientPosition()
+    {
+        return ingredientPosition;
     }
 }
