@@ -8,9 +8,11 @@ public class TenFingersCleaner : MonoBehaviour
 {
     [SerializeField] private int requiredTouchCount = 10;
     [SerializeField] private float maxDistanceBetweenTouches = 100f;
+    
 
     private Camera mainCamera;
     private bool isDetecting = false;
+    private Color elementBaseColor;
 
     // souris
 
@@ -27,6 +29,9 @@ public class TenFingersCleaner : MonoBehaviour
 
     void Start()
     {
+
+        elementBaseColor = GetComponent<Renderer>().material.color;
+
         // Activer le support tactile amélioré
         UnityEngine.InputSystem.EnhancedTouch.EnhancedTouchSupport.Enable();
         mainCamera = Camera.main;
@@ -136,7 +141,9 @@ public class TenFingersCleaner : MonoBehaviour
         Renderer renderer = objectsCollided[0].GetComponent<Renderer>();
         if (renderer != null)
         {
-            renderer.material.color = Random.ColorHSV();
+            Color currentColor = renderer.material.color;
+
+            renderer.material.color = new Color(currentColor.r, elementBaseColor.g +0.2f, currentColor.b);
         }
     }
 
@@ -199,11 +206,14 @@ public class TenFingersCleaner : MonoBehaviour
         {
             Debug.Log("10 doigts détectés simultanément dans la zone !");
 
-            /*Renderer renderer = objectsCollided[0].GetComponent<Renderer>();
+            Renderer renderer = objectsCollided[0].GetComponent<Renderer>();
             if (renderer != null)
             {
-                renderer.material.color = Random.ColorHSV();
-            }*/
+
+            Color currentColor = renderer.material.color;
+
+            renderer.material.color = new Color(currentColor.r, elementBaseColor.g + 0.2f, currentColor.b);
+        }
         }
 
         void OnDisable()
