@@ -11,41 +11,41 @@ public class Plate : BaseContainer
         maxIngredients = maxIngredientsInPlate;
     }
 
-    public override bool CanAcceptIngredient(BaseIngredient ingredient)
+    public override void OnTouchPick(int touchId)
     {
-        // Vérifie si l'assiette peut accepter plus d'ingrédients
-        if (!base.CanAcceptIngredient(ingredient)) return false;
-        
-        // Vérifie si l'ingrédient est dans un état approprié (cuit, coupé, etc.)
-        switch (ingredient.CurrentState)
+        Debug.Log($"Plate OnTouchPick called with ID: {touchId}");
+        if (!CurrentTouchId.HasValue && !IsBeingDragged)
         {
-            case IngredientState.Cut:
-            case IngredientState.Cooked:
-                return true;
-            default:
-                Debug.Log($"L'ingrédient {ingredient.name} n'est pas dans un état approprié pour être ajouté à l'assiette");
-                return false;
+            OriginalPosition = transform.position;
+            CurrentTouchId = touchId;
+            IsBeingDragged = true;
+            Debug.Log($"Plate {gameObject.name} is now being dragged");
         }
     }
 
-    public override bool AddIngredient(BaseIngredient ingredient)
+    public override void OnTouchMove(int touchId, Vector3 position)
     {
-        if (!CanAcceptIngredient(ingredient)) return false;
+        if (CurrentTouchId == touchId && IsBeingDragged)
+        {
+            transform.position = position;
+        }
+    }
 
-        // Obtient la position d'attachement et applique un décalage vertical pour empiler
-        Vector3 attachPosition = ingredientAttachPoint.position;
-        attachPosition.y += contents.Count * ingredientStackOffset;
-        
-        // Ajoute l'ingrédient à la liste
-        contents.Add(ingredient);
-        
-        // Configure la transformation de l'ingrédient
-        ingredient.transform.SetParent(ingredientAttachPoint);
-        ingredient.transform.position = attachPosition;
-        ingredient.transform.rotation = ingredientAttachPoint.rotation;
+    public override void OnTouchDrop(int touchId, Vector2 screenPosition)
+    {
+        if (CurrentTouchId == touchId && IsBeingDragged)
+        {
+            bool dropSuccessful = TryDropObject(screenPosition);
+            
+            if (!dropSuccessful)
+            {
+                Debug.Log($"Drop failed for plate {gameObject.name}, destroying");
+                Destroy(gameObject);
+            }
 
-        Debug.Log($"Ingrédient {ingredient.name} ajouté à l'assiette");
-        return true;
+            IsBeingDragged = false;
+            CurrentTouchId = null;
+        }
     }
 
     protected override bool TryDropObject(Vector2 screenPosition)
@@ -58,12 +58,11 @@ public class Plate : BaseContainer
             TableStation tableStation = hit.collider.GetComponent<TableStation>();
             if (tableStation != null && tableStation.TryPlaceIngredient(gameObject))
             {
-                Debug.Log($"Assiette placée sur la table avec succès");
+                Debug.Log($"Successfully placed plate on table station");
                 return true;
             }
         }
 
-        Debug.Log("Impossible de placer l'assiette ici");
         return false;
     }
 }
