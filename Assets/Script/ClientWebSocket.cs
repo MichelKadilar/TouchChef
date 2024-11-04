@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using NativeWebSocket;
+using UnityEngine.SceneManagement;
 
 public class ClientWebSocket : MonoBehaviour
 {
@@ -14,10 +15,6 @@ public class ClientWebSocket : MonoBehaviour
     _websocket.OnOpen += () =>
     {
       Debug.Log("Connection open!");
-      
-    
-      // Send JSON object
-      SendWebSocketMessage("{\"test\":\"message\"}");
     };
 
     _websocket.OnError += (e) =>
@@ -35,6 +32,11 @@ public class ClientWebSocket : MonoBehaviour
       // Reading a plain text message
       var message = System.Text.Encoding.UTF8.GetString(bytes);
       Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
+      if (message.Contains("startGame"))
+      {
+        // Change scene to cuisine
+        SceneManager.LoadScene("Cuisine");
+      }
     };
 
     await _websocket.Connect();
