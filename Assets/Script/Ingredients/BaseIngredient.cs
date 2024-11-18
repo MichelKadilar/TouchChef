@@ -55,6 +55,7 @@ public abstract class BaseIngredient : PickableObject, IProcessable
     
         Debug.Log($"Checking if {gameObject.name} can process {processType}. Allowed processes: {string.Join(", ", allowedProcesses)}");
         bool canProcess = allowedProcesses.Contains(processType);
+        Debug.Log($"{gameObject.name} can process {processType}: {canProcess}");
         return canProcess;
     }
     

@@ -7050,7 +7050,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 974c745c33f145dcb55e888b2bfa9cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ingredientPrefab: {fileID: 1088444659871909439, guid: af1102565efc024428d082d08c531865, type: 3}
+  ingredientPrefab: {fileID: 3137764343437157899, guid: af1102565efc024428d082d08c531865, type: 3}
   ingredientType: 0
 --- !u!1001 &1771235039
 PrefabInstance:
@@ -8489,6 +8489,7 @@ GameObject:
   - component: {fileID: 2133961565}
   - component: {fileID: 2133961568}
   - component: {fileID: 2133961569}
+  - component: {fileID: 2133961570}
   m_Layer: 3
   m_Name: Camera
   m_TagString: MainCamera
@@ -8599,6 +8600,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63382dc0ebf4471b370835a750391fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2133961570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2133961564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a6c395106af42608a0043377dfb444f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ingredientLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  raycastDistance: 100
+  debugMode: 1
 --- !u!1 &2134938058
 GameObject:
   m_ObjectHideFlags: 0

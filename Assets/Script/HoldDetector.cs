@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
-using Script.Ingredients;
 
 public class HoldDetector : MonoBehaviour
 {
@@ -51,25 +50,6 @@ public class HoldDetector : MonoBehaviour
     {
         if (debugMode) Debug.Log($"StartHolding called on {gameObject.name} with touchId {touchId}");
         
-        if (ingredient != null)
-        {
-            if (Input.touchCount == 2 && ingredient is Tomato tomato) 
-            {
-                Debug.Log("TOMATO SLICING .........");
-                Debug.Log("TOMATO WORKSTATION: " + tomato.GetCurrentWorkStation()+"\n"+ "WORKSTATION Position: "+ tomato.GetCurrentWorkStation().workStationPosition);
-                tomato.Slice(position, mainCamera, ingredient);
-                return;
-            }
-            
-            if(Input.touchCount == 2 && ingredient is Meat meat)
-            {
-                Debug.Log("MEAT SLICING .........");
-                Debug.Log("MEAT WORKSTATION: " + meat.GetCurrentWorkStation()+"\n"+ "WORKSTATION Position: "+ meat.GetCurrentWorkStation().workStationPosition);
-                meat.Slice(position, mainCamera, ingredient);
-                return;
-            }
-        }
-
         if (isHolding || currentTouchId.HasValue)
         {
             if (debugMode) Debug.Log($"Hold failed: Already holding or touch assigned on {gameObject.name}");
@@ -111,20 +91,7 @@ public class HoldDetector : MonoBehaviour
 
         if (debugMode) Debug.Log($"Starting hold process on {gameObject.name}");
         
-        if (ingredient is Tomato tomato1 && tomato1.sliderInstance != null)
-        {
-            Destroy(tomato1.sliderInstance);
-            tomato1.sliderInstance = null;
-            Debug.Log("Slider destroyed at start of hold");
-        }
         
-        if (ingredient is Meat meat1 && meat1.sliderInstance != null)
-        {
-            Destroy(meat1.sliderInstance);
-            meat1.sliderInstance = null;
-            Debug.Log("Slider destroyed at start of hold");
-        }
-
         currentTouchId = touchId;
         holdStartPosition = position;
         isHolding = true;

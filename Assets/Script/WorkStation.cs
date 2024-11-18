@@ -144,7 +144,6 @@ public class WorkStation : MonoBehaviour
             }
 
             PlaceObject(obj, processable, null);
-            Debug.Log("EDITINGTEOHAEJUOGIFHA{}FUJFHEA{FUIHEA");
             return true;
         }
         
