@@ -65,19 +65,11 @@ public class Meat : BaseIngredient, ISliceable
                 case ProcessType.Cook:
                     if (cookingTimer < burnTime)
                     {
-                        Debug.Log("WAWAWAWAWAW");
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
-                        WorkStation ws = this.GetCurrentWorkStation();
-                        Transform ingredientPosition = ws.GetIngredientPosition();
-                        Vector3 newPos = new Vector3(ingredientPosition.position.x, ingredientPosition.position.y,
-                            ingredientPosition.position.z);
-                        Debug.Log("LOG 9ABL");
-                        Quaternion rotation = Quaternion.Euler(90, 0, 0);
-                        Debug.Log("LOG BA3D");
                         isProcessing = false;
                     }
-                    else
+                    else if (cookingTimer >= burnTime && this.GetCurrentWorkStation().GetStationType() == ProcessType.Cook)
                     {
                         currentState = IngredientState.Burned;
                         allowedProcesses.Clear();
