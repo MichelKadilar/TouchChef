@@ -7,12 +7,14 @@ using UnityEngine.UI;
 public class Meat : BaseIngredient, ISliceable
     {
         [Header("Visuals")]
+        [SerializeField] private GameObject stateVisualContainer;
         [SerializeField] private GameObject rawVisual;
         [SerializeField] private GameObject cutVisual;
         [SerializeField] private GameObject cookedVisual;
         [SerializeField] private GameObject burnedVisual;
         
-     
+        private Slider _slider;
+
         [Header("Slice Options")]
         public int neededSlices = 5; // Number of slices needed to complete slicing
         
@@ -25,6 +27,29 @@ public class Meat : BaseIngredient, ISliceable
         
         protected override void Awake()
         {
+            // Ensure stateVisualContainer is assigned
+            if (stateVisualContainer == null)
+            {
+                Debug.LogError($"{gameObject.name}: stateVisualContainer is not assigned!");
+                return;
+            }
+
+            // Dynamically find the slider within the Canva child
+            if (_slider == null)
+            {
+                Transform canvaTransform = stateVisualContainer.transform.Find("Canvas");
+                if (canvaTransform != null)
+                {
+                    _slider = canvaTransform.GetComponentInChildren<Slider>();
+                    _slider.maxValue = neededSlices;
+                    _slider.gameObject.SetActive(false);
+                }
+
+                if (_slider == null)
+                {
+                    Debug.LogError($"{gameObject.name}: Slider is not found inside the Canvas child of stateVisualContainer!");
+                }
+            }
             if (allowedProcesses == null)
             {
                 allowedProcesses = new List<ProcessType>();
@@ -41,11 +66,14 @@ public class Meat : BaseIngredient, ISliceable
         {
             Debug.Log("Slicing meat");
             currentSlice++;
+            _slider.gameObject.SetActive(true);
+            _slider.value = currentSlice;
             if (currentSlice>=neededSlices)
             {
                 currentState = IngredientState.Cut;
                 allowedProcesses.Clear();
                 allowedProcesses.Add(ProcessType.Cook);
+                _slider.gameObject.SetActive(false);
             }
             UpdateVisual();
         }

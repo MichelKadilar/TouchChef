@@ -32,6 +32,8 @@ public class Tomato : BaseIngredient, ISliceable
             if (canvaTransform != null)
             {
                 _slider = canvaTransform.GetComponentInChildren<Slider>();
+                _slider.maxValue = neededSlices;
+                _slider.gameObject.SetActive(false);
             }
 
             if (_slider == null)
@@ -46,11 +48,6 @@ public class Tomato : BaseIngredient, ISliceable
         }
         allowedProcesses.Clear();
         allowedProcesses.Add(ProcessType.Cut);
-
-        if (_slider != null)
-        {
-            _slider.maxValue = neededSlices;
-        }
 
         Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
         base.Awake();
@@ -72,6 +69,7 @@ public class Tomato : BaseIngredient, ISliceable
             {
                 Debug.Log("CURRENT STATE : CUT");
                 currentState = IngredientState.Cut;
+                _slider.gameObject.SetActive(false);
                 UpdateVisual();
             }
             
