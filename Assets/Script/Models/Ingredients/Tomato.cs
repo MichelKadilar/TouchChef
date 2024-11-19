@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tomato : BaseIngredient, ISliceable
 {
@@ -7,6 +8,8 @@ public class Tomato : BaseIngredient, ISliceable
     [SerializeField] private GameObject stateVisualContainer; 
     [SerializeField] private GameObject rawVisual;
     [SerializeField] private GameObject cutVisual;
+    
+    private Slider _slider;
 
     [Header("Slice Options")]
     public int neededSlices = 4;
@@ -15,6 +18,28 @@ public class Tomato : BaseIngredient, ISliceable
 
     protected override void Awake()
     {
+        // Ensure stateVisualContainer is assigned
+        if (stateVisualContainer == null)
+        {
+            Debug.LogError($"{gameObject.name}: stateVisualContainer is not assigned!");
+            return;
+        }
+
+        // Dynamically find the slider within the Canva child
+        if (_slider == null)
+        {
+            Transform canvaTransform = stateVisualContainer.transform.Find("Canvas");
+            if (canvaTransform != null)
+            {
+                _slider = canvaTransform.GetComponentInChildren<Slider>();
+            }
+
+            if (_slider == null)
+            {
+                Debug.LogError($"{gameObject.name}: Slider is not found inside the Canvas child of stateVisualContainer!");
+            }
+        }
+
         if (allowedProcesses == null)
         {
             allowedProcesses = new List<ProcessType>();
@@ -22,20 +47,34 @@ public class Tomato : BaseIngredient, ISliceable
         allowedProcesses.Clear();
         allowedProcesses.Add(ProcessType.Cut);
 
+        if (_slider != null)
+        {
+            _slider.maxValue = neededSlices;
+        }
+
         Debug.Log($"Tomato {gameObject.name} initializing with process: Cut");
         base.Awake();
         UpdateVisual();
-        Debug.Log($" CURRENT STATE : {currentState}");
+        Debug.Log($"CURRENT STATE: {currentState}");
     }
+
 
     public void Slice()
     {
         Debug.Log("Slicing tomato !");
         if (currentState == IngredientState.Raw)
         {
-            Debug.Log("CURRENT STATE : CUT");
-            currentState = IngredientState.Cut;
-            UpdateVisual();
+            currentSlice++;
+            _slider.gameObject.SetActive(true);
+            _slider.value = currentSlice;
+            Debug.Log("Slider value: " + _slider.value);
+            if (currentSlice >= neededSlices)
+            {
+                Debug.Log("CURRENT STATE : CUT");
+                currentState = IngredientState.Cut;
+                UpdateVisual();
+            }
+            
             
         }
     }

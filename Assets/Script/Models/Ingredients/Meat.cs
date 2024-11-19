@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class Meat : BaseIngredient
+public class Meat : BaseIngredient, ISliceable
     {
         [Header("Visuals")]
         [SerializeField] private GameObject rawVisual;
@@ -12,19 +12,13 @@ public class Meat : BaseIngredient
         [SerializeField] private GameObject cookedVisual;
         [SerializeField] private GameObject burnedVisual;
         
-       
-        [Header("Slider")]
-        [SerializeField] private GameObject sliderPrefabRight; // Prefab for the slider
-        [SerializeField] private GameObject sliderPrefabLeft; // Prefab for the slider
-        
+     
         [Header("Slice Options")]
         public int neededSlices = 5; // Number of slices needed to complete slicing
-    
-        private Slider slider; // Reference to the slider
+        
         private int currentSlice = 0; // Current slice count
-
-        internal GameObject sliderInstance; // To hold the instantiated slider
-
+        
+        
         [Header("Cooking Options")]
         [SerializeField] private float burnTime = 6f; // Double the normal cooking time
         private float cookingTimer = 0f;
@@ -43,94 +37,22 @@ public class Meat : BaseIngredient
             UpdateVisual();
             Debug.Log($" CURRENT STATE MEAT : {currentState}");
         }
-        // Method to handle slicing
-        public void Slice(Vector2 position, Camera camera, BaseIngredient ingredient)
+
+        public void Slice()
         {
-            Debug.Log("Slicing meat!");
-            
-            if (currentState == IngredientState.Raw)
+            Debug.Log("Slicing meat");
+            currentSlice++;
+            if (currentSlice>=neededSlices)
             {
-                // Check if the slider has been instantiated
-                if (sliderInstance == null)
-                {
-                    // Set the screen position for the slider with z = 10
-                    Vector3 screenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
-                    Debug.Log($"Screen position: {screenPos}");
-                    
-                    if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.RIGHT)
-                    {
-                        // Instantiate the slider prefab at this position
-                        sliderInstance = Instantiate(sliderPrefabRight, screenPos, Quaternion.identity); 
-                    }
-                    else if (ingredient.GetCurrentWorkStation().workStationPosition == WorkStationPosition.LEFT)
-                    {
-                        // Instantiate the slider prefab at this position
-                        sliderInstance = Instantiate(sliderPrefabLeft, screenPos, Quaternion.identity); 
-                    }
-                    
-
-                    
-
-                    // Set the slider as a child of the Canvas (to ensure it appears in UI space)
-                    Canvas sliderCanvas = sliderInstance.GetComponentInParent<Canvas>();
-                    if (sliderCanvas != null)
-                    {
-                        sliderCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-
-                        // Get the CanvasScaler and configure it
-                        CanvasScaler scaler = sliderCanvas.GetComponent<CanvasScaler>();
-                        if (scaler != null)
-                        {
-                            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                            scaler.referenceResolution = new Vector2(1920, 1080);
-                            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                            scaler.matchWidthOrHeight = 0.5f;
-                        }
-                    }
-
-                    // Get the Slider component and set max and initial values
-                    slider = sliderInstance.GetComponentInChildren<Slider>();
-                    slider.maxValue = neededSlices;
-                    slider.value = currentSlice;
-                }
-
-                // Update the slider's position each time it slices
-                Vector3 updatedScreenPos = camera.WorldToScreenPoint(new Vector3(ingredient.transform.position.x, ingredient.transform.position.y, 10));
-                sliderInstance.transform.position = updatedScreenPos;
-
-                currentSlice++;
-                slider.value = currentSlice;
-                Debug.Log($"Sliced meat! Current slice: {currentSlice}");
-
-                if (currentSlice == neededSlices)
-                {
-                    Debug.Log("All slices completed!");
-                    CompleteProcessingCut(position, camera, ingredient);
-                }
+                currentState = IngredientState.Cut;
+                allowedProcesses.Clear();
+                allowedProcesses.Add(ProcessType.Cook);
             }
-        }
-        
-        protected void CompleteProcessingCut(Vector2 position, Camera camera, BaseIngredient ingredient)
-        {
-            currentState = IngredientState.Cut;
-            
-            Vector3 rawPosition = camera.ScreenToWorldPoint(new Vector3(position.x, position.y, 10));
-            Quaternion rotation = Quaternion.Euler(-90, 0, 0); 
-            Instantiate(cutVisual, rawPosition, rotation);
-
-           
-            ingredient.gameObject.SetActive(false);
-            Debug.Log("Meat sliced!");
-            
-            if (sliderInstance != null)
-            {
-                Destroy(sliderInstance);
-            }
-            
-            allowedProcesses.Clear();
-            allowedProcesses.Add(ProcessType.Cook);
             UpdateVisual();
         }
+        
+        
+      
 
         protected override void CompleteProcessing(ProcessType processType)
         {
@@ -203,15 +125,9 @@ public class Meat : BaseIngredient
 
         private void UpdateVisual()
         {
-            /*
             rawVisual.SetActive(currentState == IngredientState.Raw);
+            cutVisual.SetActive(currentState == IngredientState.Cut);
             cookedVisual.SetActive(currentState == IngredientState.Cooked);
             burnedVisual.SetActive(currentState == IngredientState.Burned);
-            
-            if (currentState == IngredientState.Cut)
-            {
-                Debug.Log("Cut visual instantiated!");
-            }
-            */
         }
     }
