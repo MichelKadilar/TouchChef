@@ -93,30 +93,7 @@ public class Tomato : BaseIngredient, ISliceable
 
     private void UpdateVisual()
     {
-        if (stateVisualContainer == null)
-        {
-            Debug.LogWarning("State visual container is not assigned!");
-            return;
-        }
-
-        // Disable all child visuals
-        foreach (Transform child in stateVisualContainer.transform)
-        {
-            child.gameObject.SetActive(false);
-            Debug.Log($"Child {child.gameObject.name} visual disabled");
-        }
-
-        
-        switch (currentState)
-        {
-            case IngredientState.Raw:
-                if (rawVisual != null)
-                    rawVisual.SetActive(true);
-                break;
-            case IngredientState.Cut:
-                if (cutVisual != null)
-                    cutVisual.SetActive(true);
-                break;
-        }
+        rawVisual.SetActive(currentState == IngredientState.Raw);
+        cutVisual.SetActive(currentState == IngredientState.Cut);
     }
 }

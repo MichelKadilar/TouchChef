@@ -206,7 +206,7 @@ Transform:
   m_GameObject: {fileID: 3137764343437157899}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -56.63, y: -13.482098, z: -29.022896}
+  m_LocalPosition: {x: -56.63, y: -13.482098, z: 0.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -314,7 +314,6 @@ MonoBehaviour:
   stateVisualContainer: {fileID: 3137764343437157899}
   rawVisual: {fileID: 5327302407948473007}
   cutVisual: {fileID: 7163477338388217847}
-  _slider: {fileID: 2184161407628569989}
   neededSlices: 4
 --- !u!1 &4016332642426011377
 GameObject:
