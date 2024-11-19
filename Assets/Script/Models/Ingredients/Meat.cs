@@ -31,7 +31,6 @@ public class Meat : BaseIngredient, ISliceable
             }
             allowedProcesses.Clear();
             allowedProcesses.Add(ProcessType.Cut);
-            allowedProcesses.Add(ProcessType.Cook);
             
             base.Awake();
             UpdateVisual();
@@ -73,10 +72,8 @@ public class Meat : BaseIngredient, ISliceable
                         Transform ingredientPosition = ws.GetIngredientPosition();
                         Vector3 newPos = new Vector3(ingredientPosition.position.x, ingredientPosition.position.y,
                             ingredientPosition.position.z);
-                        this.gameObject.SetActive(false);
                         Debug.Log("LOG 9ABL");
                         Quaternion rotation = Quaternion.Euler(90, 0, 0);
-                        Instantiate(cookedVisual, newPos, rotation);
                         Debug.Log("LOG BA3D");
                         isProcessing = false;
                     }
