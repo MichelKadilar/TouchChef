@@ -29,7 +29,7 @@ public class SliceDetector : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1)) // Right mouse button click
         {
-            if (debugMode) Debug.Log("Right mouse button clicked.");
+            if (debugMode) Debug.Log("/.//////////////////////// Right mouse button clicked.");
 
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -44,12 +44,12 @@ public class SliceDetector : MonoBehaviour
                 if (ingredient != null && ingredient is ISliceable sliceableIngredient && ingredient.GetCurrentWorkStation().GetStationType()==ProcessType.Cut)
                 {
                     // Call the Slice method
-                    if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
+                    if (debugMode) Debug.Log($"/.//////////////////////// Slicing ingredient: {clickedObject.name}");
                     sliceableIngredient.Slice();
                 }
                 else
                 {
-                    if (debugMode) Debug.Log($"Object clicked is not sliceable: {clickedObject.name} or not on a cutting station");
+                    if (debugMode) Debug.Log($"/.//////////////////////// Object clicked is not sliceable: {clickedObject.name} or not on a cutting station");
                 }
             }
         }
