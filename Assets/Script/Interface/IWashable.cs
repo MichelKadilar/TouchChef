@@ -1,8 +1,6 @@
-namespace Script.Interface
+
+public interface IWashable
 {
-    public interface IWashable
-    {
-        void StartWash();
-        void StopWash();
-    }
+    void StartWash();
+    void StopWash();
 }

@@ -8639,7 +8639,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 13.46
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -8748,6 +8748,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 8
+  tapThreshold: 0.2
 --- !u!114 &2133961573
 MonoBehaviour:
   m_ObjectHideFlags: 0

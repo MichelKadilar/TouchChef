@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using Script.Interface;
 using UnityEngine;
 using UnityEngine.UI;
 public class Lettuce : BaseIngredient, ISliceable, IWashable

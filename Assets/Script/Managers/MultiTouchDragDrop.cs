@@ -6,10 +6,22 @@ using UnityEngine.InputSystem;
 public class MultiTouchDragDrop : MonoBehaviour
 {
     [SerializeField] private LayerMask interactableLayer;
+    [SerializeField] private float tapThreshold = 0.2f;
+
     private Camera mainCamera;
 
-    private Dictionary<int, PickableObject> activeTouches = new Dictionary<int, PickableObject>();
+    // Dictionaries to track touch interactions
+    private Dictionary<int, IPickable> activeDragObjects = new Dictionary<int, IPickable>();
     private Dictionary<int, TouchInfo> touchInfos = new Dictionary<int, TouchInfo>();
+
+    // Inner class to store touch information
+    private class TouchInfo
+    {
+        public Vector2 startPosition;
+        public float startTime;
+        public bool isHolding;
+        public GameObject targetObject;
+    }
 
     private void Awake()
     {
@@ -20,82 +32,67 @@ public class MultiTouchDragDrop : MonoBehaviour
 
     private void Update()
     {
-        if (Touchscreen.current != null) 
+        HandleTouchInput();
+    }
+
+    private void HandleTouchInput()
+    {
+        if (Touchscreen.current != null)
         {
             // Handle touchscreen input
             foreach (var touch in Touchscreen.current.touches)
             {
                 int touchId = touch.touchId.ReadValue();
+                Vector2 position = touch.position.ReadValue();
 
-                if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+                switch (touch.phase.ReadValue())
                 {
-                    HandleTouchStart(touchId, touch.position.ReadValue());
-                }
-                else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Moved || 
-                         touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Stationary)
-                {
-                    HandleTouchMove(touchId, touch.position.ReadValue());
-                }
-                else if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Ended || 
-                         touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Canceled)
-                {
-                    HandleTouchEnd(touchId);
+                    case UnityEngine.InputSystem.TouchPhase.Began:
+                        HandleTouchStart(touchId, position);
+                        break;
+                    case UnityEngine.InputSystem.TouchPhase.Moved:
+                    case UnityEngine.InputSystem.TouchPhase.Stationary:
+                        HandleTouchMove(touchId, position);
+                        break;
+                    case UnityEngine.InputSystem.TouchPhase.Ended:
+                    case UnityEngine.InputSystem.TouchPhase.Canceled:
+                        HandleTouchEnd(touchId, position);
+                        break;
                 }
             }
         }
-        else if (Mouse.current != null) 
+        else if (Mouse.current != null)
         {
             // Handle mouse input
-            int touchId = 0; // You can use touchId 0 for the first mouse input
+            int touchId = 0;
             Vector2 mousePosition = Mouse.current.position.ReadValue();
 
             if (Mouse.current.leftButton.wasPressedThisFrame)
-            {
                 HandleTouchStart(touchId, mousePosition);
-            }
             else if (Mouse.current.leftButton.isPressed)
-            {
                 HandleTouchMove(touchId, mousePosition);
-            }
             else if (Mouse.current.leftButton.wasReleasedThisFrame)
-            {
-                HandleTouchEnd(touchId);
-            }
+                HandleTouchEnd(touchId, mousePosition);
         }
     }
 
-    
-    private GameObject GetTouchedObject(Vector2 position)
-    {
-        Ray ray = mainCamera.ScreenPointToRay(position);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, interactableLayer))
-        {
-            return hit.collider.gameObject;
-        }
-        return null; 
-    }
-
-    // HANDLE TOUCH START
     private void HandleTouchStart(int touchId, Vector2 position)
     {
         Debug.Log($"HandleTouchStart - TouchID: {touchId}, Position: {position}");
 
-        // Create a TouchInfo object to store touch info for this touchId
-        GameObject touchedObject = GetTouchedObject(position);
-        var pickableObject = touchedObject?.GetComponent<PickableObject>();
-    
-        if (pickableObject != null)
+        // Check if any object is already being dragged
+        bool isAnyObjectDragged = FindObjectsOfType<MonoBehaviour>()
+            .OfType<IPickable>()
+            .Any(p => p.IsBeingDragged);
+
+        // Store touch information
+        touchInfos[touchId] = new TouchInfo
         {
-            activeTouches[touchId] = pickableObject;
-            touchInfos[touchId] = new TouchInfo
-            {
-                startPosition = position,
-                startTime = Time.time,
-                isHolding = false,
-                targetObject = touchedObject
-            };
-        }
-        
+            startPosition = position,
+            startTime = Time.time,
+            isHolding = false,
+            targetObject = GetTouchedObject(position)
+        };
 
         // Cast a ray to check for interactable objects
         Ray ray = mainCamera.ScreenPointToRay(position);
@@ -103,12 +100,12 @@ public class MultiTouchDragDrop : MonoBehaviour
 
         if (hits.Length > 0)
         {
-            // Sort the hits by distance to prioritize closer objects
+            // Sort hits by distance to prioritize closer objects
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-            // Process the closest interactable object
             foreach (var hit in hits)
             {
+                // Try handling different types of interactions in order
                 if (HandleBasketTouch(hit, touchId)) return;
                 if (HandlePlateStackTouch(hit, touchId)) return;
                 if (HandleIngredientTouch(hit, touchId)) return;
@@ -118,24 +115,61 @@ public class MultiTouchDragDrop : MonoBehaviour
         }
     }
 
-
-    private bool IsAnyObjectBeingDragged()
+    private void HandleTouchMove(int touchId, Vector2 position)
     {
-        return FindObjectsOfType<MonoBehaviour>()
-            .OfType<IPickable>()
-            .Any(p => p.IsBeingDragged);
+        // Move dragged objects
+        if (activeDragObjects.TryGetValue(touchId, out IPickable pickable))
+        {
+            Vector3 worldPosition = GetWorldPosition(position);
+            pickable.OnTouchMove(touchId, worldPosition);
+        }
+
+        // Handle holding interactions
+        if (touchInfos.TryGetValue(touchId, out TouchInfo info) && info.isHolding)
+        {
+            var holdableObjects = FindObjectsOfType<MonoBehaviour>()
+                .Select(m => m.GetComponent<HoldDetector>())
+                .Where(h => h != null);
+
+            foreach (var holdDetector in holdableObjects)
+            {
+                holdDetector.UpdateHolding(touchId, position);
+            }
+        }
+    }
+
+    private void HandleTouchEnd(int touchId, Vector2 position)
+    {
+        if (!touchInfos.TryGetValue(touchId, out TouchInfo info))
+            return;
+
+        // Check for tap
+        if (Time.time - info.startTime < tapThreshold && !info.isHolding)
+        {
+            HandleTapProcess(info.targetObject);
+        }
+
+        // Drop dragged objects
+        if (activeDragObjects.TryGetValue(touchId, out IPickable pickable))
+        {
+            pickable.OnTouchDrop(touchId, position);
+            activeDragObjects.Remove(touchId);
+        }
+
+        // Process ingredients after touch
+        ProcessIngredients();
+
+        // Clean up touch information
+        touchInfos.Remove(touchId);
     }
 
     private bool HandleBasketTouch(RaycastHit hit, int touchId)
     {
-        Debug.Log($"//////////////////// Basket touched: {hit.collider.name}");
         var basket = hit.collider.GetComponent<Basket>();
-        Vector2 basketPosition = hit.collider.transform.position;
         if (basket != null)
         {
-            Debug.Log($"//////////////// Basket touched: {basket.name}");
-            basket.OnTouchDown(touchId, basketPosition);
-            return true; 
+            basket.OnTouchDown(touchId, hit.point);
+            return true;
         }
         return false;
     }
@@ -145,7 +179,6 @@ public class MultiTouchDragDrop : MonoBehaviour
         var plateStack = hit.collider.GetComponent<PlateStack>();
         if (plateStack != null)
         {
-            Debug.Log($"PlateStack touched: {plateStack.name}");
             plateStack.OnTouchDown(touchId, hit.point);
             return true;
         }
@@ -161,14 +194,11 @@ public class MultiTouchDragDrop : MonoBehaviour
         {
             if (ingredient.GetCurrentWorkStation() != null)
             {
-                HandleHoldDetection(ingredient, pickable, touchId, touchInfos[touchId].startPosition);
-                return true;
+                return HandleHoldDetection(ingredient, pickable, touchId);
             }
             else
             {
-                Debug.Log($"Picking up ingredient: {ingredient.name}");
-                pickable?.OnTouchPick(touchId);
-                return true;
+                return HandlePickup(pickable, touchId);
             }
         }
         return false;
@@ -183,14 +213,11 @@ public class MultiTouchDragDrop : MonoBehaviour
         {
             if (container.GetCurrentWorkStation() != null)
             {
-                HandleHoldDetection(container, pickable, touchId, touchInfos[touchId].startPosition);
-                return true;
+                return HandleHoldDetection(container, pickable, touchId);
             }
             else
             {
-                Debug.Log($"Picking up container: {container.name}");
-                pickable?.OnTouchPick(touchId);
-                return true;
+                return HandlePickup(pickable, touchId);
             }
         }
         return false;
@@ -201,55 +228,72 @@ public class MultiTouchDragDrop : MonoBehaviour
         var pickable = hit.collider.GetComponent<IPickable>();
         if (pickable != null && !pickable.IsBeingDragged)
         {
-            Debug.Log($"Picking up other object: {hit.collider.name}");
+            return HandlePickup(pickable, touchId);
+        }
+        return false;
+    }
+
+    private bool HandleHoldDetection(MonoBehaviour interactableObject, IPickable pickable, int touchId)
+    {
+        var holdDetector = interactableObject.GetComponent<HoldDetector>();
+        if (holdDetector != null)
+        {
+            holdDetector.StartHolding(touchId, touchInfos[touchId].startPosition);
+            touchInfos[touchId].isHolding = true;
+            return true;
+        }
+        return HandlePickup(pickable, touchId);
+    }
+
+    private bool HandlePickup(IPickable pickable, int touchId)
+    {
+        if (pickable != null)
+        {
             pickable.OnTouchPick(touchId);
+            activeDragObjects[touchId] = pickable;
             return true;
         }
         return false;
     }
 
-    private void HandleHoldDetection(MonoBehaviour interactableObject, IPickable pickable, int touchId, Vector2 position)
+    private void HandleTapProcess(GameObject targetObject)
     {
-        var holdDetector = interactableObject.GetComponent<HoldDetector>();
-        if (holdDetector != null)
+        if (targetObject == null) return;
+
+        var workStation = targetObject.GetComponent<WorkStation>();
+        if (workStation != null && workStation.HasIngredient())
         {
-            Debug.Log($"Starting hold on {interactableObject.name}");
-            holdDetector.StartHolding(touchId, position);
-            touchInfos[touchId].isHolding = true;
-        }
-        else
-        {
-            Debug.Log($"Picking up {interactableObject.name}");
-            pickable?.OnTouchPick(touchId);
+            workStation.StartProcessing();
         }
     }
 
-
-
-    private void HandleTouchMove(int touchId, Vector2 position)
+    private void ProcessIngredients()
     {
-        if (activeTouches.ContainsKey(touchId))
+        var ingredients = FindObjectsOfType<BaseIngredient>();
+        foreach (var ingredient in ingredients)
         {
-            var touchedObject = activeTouches[touchId];
-            if (touchedObject != null)
+            // Stop holding for all ingredients
+            var holdDetector = ingredient.GetComponent<HoldDetector>();
+            holdDetector?.StopHolding();
+
+            // Process cooking if on a cooking workstation
+            if (ingredient.CanProcess(ProcessType.Cook) && 
+                ingredient.GetCurrentWorkStation()?.GetStationType() == ProcessType.Cook)
             {
-                Vector3 newPosition = GetWorldPosition(position);
-                touchedObject.transform.position = newPosition;
-                Debug.Log($"Touch {touchId} moved {touchedObject.name} to {newPosition}");
+                ingredient.Process(ProcessType.Cook);
             }
         }
     }
 
-
-    private void HandleTouchEnd(int touchId)
+    private GameObject GetTouchedObject(Vector2 position)
     {
-        if (activeTouches.ContainsKey(touchId))
+        Ray ray = mainCamera.ScreenPointToRay(position);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, interactableLayer))
         {
-            Debug.Log($"Touch {touchId} ended on {activeTouches[touchId].name}");
-            activeTouches.Remove(touchId);
+            return hit.collider.gameObject;
         }
+        return null;
     }
-
 
     private Vector3 GetWorldPosition(Vector2 screenPosition)
     {

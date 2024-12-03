@@ -1,4 +1,3 @@
-using Script.Interface;
 using UnityEngine;
 
 public class WashDetector : MonoBehaviour
