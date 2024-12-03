@@ -14,7 +14,7 @@ public abstract class BaseIngredient : PickableObject, IProcessable
     
     public IngredientState CurrentState => currentState;
     
-    protected override void Awake()
+    protected void Awake()
     {
         base.Awake();
         InitializeHoldDetector();
@@ -73,7 +73,8 @@ public abstract class BaseIngredient : PickableObject, IProcessable
     
     public virtual bool CanStartProcessing(ProcessType processType)
     {
-        if (IsBeingDragged)
+        bool isBeingDragged = DraggingManager.Instance.IsBeingDragged((IPickable) this);
+        if (isBeingDragged)
         {
             Debug.Log($"Cannot start processing {gameObject.name}: currently being dragged");
             return false;
@@ -115,7 +116,8 @@ public abstract class BaseIngredient : PickableObject, IProcessable
     {
         Debug.Log($"Hold completed on {gameObject.name}, initiating pick with touchId {touchId}");
         
-        if (isProcessing || IsBeingDragged)
+        bool isBeingDragged = DraggingManager.Instance.IsBeingDragged((IPickable) this);
+        if (isProcessing || isBeingDragged)
         {
             Debug.Log($"Cannot pick {gameObject.name}: {(isProcessing ? "currently processing" : "already being dragged")}");
             return;
@@ -125,7 +127,7 @@ public abstract class BaseIngredient : PickableObject, IProcessable
         Debug.Log($"Pick initiated successfully on {gameObject.name}");
     }
 
-    public override void OnTouchPick(int touchId)
+    private void OnTouchPick(int touchId)
     {
         if (isProcessing)
         {
@@ -137,10 +139,13 @@ public abstract class BaseIngredient : PickableObject, IProcessable
         base.OnTouchPick(touchId);
     }
 
-    public override void OnTouchDrop(int touchId, Vector2 screenPosition)
+    public void OnTouchDrop(int touchId, Vector2 screenPosition)
     {
         float yRotation = transform.eulerAngles.y;
-        base.OnTouchDrop(touchId, screenPosition);
+        if (!TryDropObject(screenPosition))
+        {
+            OnPickFailed();
+        }
         Vector3 currentRotation = transform.eulerAngles;
         currentRotation.y = yRotation;
         transform.rotation = Quaternion.Euler(currentRotation);

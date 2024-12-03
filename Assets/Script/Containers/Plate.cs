@@ -5,7 +5,7 @@ public class Plate : BaseContainer
     [SerializeField] private int maxIngredientsInPlate = 4;
     [SerializeField] private float ingredientStackOffset = 0.1f;
     
-    protected override void Awake()
+    protected void Awake()
     {
         base.Awake();
         maxIngredients = maxIngredientsInPlate;

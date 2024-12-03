@@ -1,13 +1,15 @@
 
 using System.Collections.Generic;
+using Script.Interface;
 using UnityEngine;
 using UnityEngine.UI;
-public class Lettuce : BaseIngredient, ISliceable
+public class Lettuce : BaseIngredient, ISliceable, IWashable
 {
     [Header("State Visuals")]
     [SerializeField] private GameObject stateVisualContainer; 
     [SerializeField] private GameObject rawVisual;
     [SerializeField] private GameObject cutVisual;
+    [SerializeField] private GameObject waterVisual;
     
     private Slider _slider;
     
@@ -16,7 +18,7 @@ public class Lettuce : BaseIngredient, ISliceable
 
     private int currentSlice = 0;
     
-    protected override void Awake()
+    protected void Awake()
     {
         // Ensure stateVisualContainer is assigned
         if (stateVisualContainer == null)
@@ -47,8 +49,10 @@ public class Lettuce : BaseIngredient, ISliceable
         {
             allowedProcesses = new List<ProcessType>();
         }
+        waterVisual.SetActive(false);
         allowedProcesses.Clear();
         allowedProcesses.Add(ProcessType.Cut);
+        allowedProcesses.Add(ProcessType.Wash);
 
     
         
@@ -74,6 +78,16 @@ public class Lettuce : BaseIngredient, ISliceable
             }
         }
         UpdateVisual();
+    }
+
+    public void StartWash()
+    {
+        waterVisual.SetActive(true);
+    }
+    
+    public void StopWash()
+    {
+        waterVisual.SetActive(false);
     }
     
     private void UpdateVisual()

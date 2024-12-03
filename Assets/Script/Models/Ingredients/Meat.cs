@@ -25,7 +25,7 @@ public class Meat : BaseIngredient, ISliceable
         [SerializeField] private float burnTime = 6f; // Double the normal cooking time
         private float cookingTimer = 0f;
         
-        protected override void Awake()
+        protected void Awake()
         {
             // Ensure stateVisualContainer is assigned
             if (stateVisualContainer == null)

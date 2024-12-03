@@ -16,7 +16,7 @@ public class Tomato : BaseIngredient, ISliceable
 
     private int currentSlice = 0;
 
-    protected override void Awake()
+    protected void Awake()
     {
         // Ensure stateVisualContainer is assigned
         if (stateVisualContainer == null)

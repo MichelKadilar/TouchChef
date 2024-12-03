@@ -7,7 +7,7 @@ public class Basket : MonoBehaviour
     
     public void OnTouchDown(int touchId, Vector2 position)
     {
-        Debug.Log($"Basket.OnTouchDown called on {gameObject.name}");
+        Debug.Log($"/////////////// Basket.OnTouchDown called on {gameObject.name}");
         if (ingredientPrefab == null)
         {
             Debug.LogError($"Basket {gameObject.name}: ingredientPrefab not assigned!");

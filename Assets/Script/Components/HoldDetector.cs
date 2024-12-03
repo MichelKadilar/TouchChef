@@ -35,7 +35,7 @@ public class HoldDetector : MonoBehaviour
         
         if (ingredient == null && container == null)
         {
-            Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient or IContainer component!");
+           Debug.LogError($"HoldDetector on {gameObject.name}: Missing BaseIngredient or IContainer component!");
             return;
         }
         

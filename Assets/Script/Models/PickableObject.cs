@@ -1,132 +1,98 @@
 ﻿using UnityEngine;
 
-public class PickableObject : MonoBehaviour, IPickable
+public class PickableObject : MonoBehaviour , IPickable
 {
     protected Camera mainCamera;
     private WorkStation currentWorkStation = null;
     private WorkStation previousWorkStation = null;
     private bool isFromBasket = true;
-    
-    public int? CurrentTouchId { get; protected set; }
-    public bool IsBeingDragged { get; protected set; }
-    public Vector3 OriginalPosition { get; protected set; }
 
-    protected virtual void Awake()
+    private Vector3 originalPosition;
+
+    protected void Awake()
     {
         mainCamera = Camera.main;
-    }
-
-    public virtual void OnTouchPick(int touchId)
-    {
-        if (!CurrentTouchId.HasValue && !IsBeingDragged)
+        if (mainCamera == null)
         {
-            OriginalPosition = transform.position;
-            
-            if (currentWorkStation != null)
-            {
-                Debug.Log($"Picking up {gameObject.name} from workstation {currentWorkStation.name}");
-                previousWorkStation = currentWorkStation;
-                currentWorkStation.RemoveIngredient();
-                isFromBasket = false;
-            }
-
-            CurrentTouchId = touchId;
-            IsBeingDragged = true;
-            Debug.Log($"Object picked up by touch {touchId}: {gameObject.name}, IsFromBasket: {isFromBasket}");
-        }
-    }
-    public virtual void OnTouchMove(int touchId, Vector3 position)
-    {
-        if (CurrentTouchId == touchId && IsBeingDragged)
-        {
-            transform.position = position;
+            Debug.LogError("Main Camera not found! Picking and dropping functionality will fail.");
         }
     }
 
-    public virtual void OnTouchDrop(int touchId, Vector2 screenPosition)
+    public int? CurrentTouchId { get; }
+    public bool IsBeingDragged { get; }
+    public Vector3 OriginalPosition { get; }
+    public void OnTouchPick(int touchId)
     {
-        if (CurrentTouchId == touchId && IsBeingDragged)
-        {
-            bool dropSuccessful = TryDropObject(screenPosition);
-            
-            if (!dropSuccessful)
-            {
-                OnPickFailed();
-            }
+        // Save the original position
+        originalPosition = transform.position;
 
-            IsBeingDragged = false;
-            CurrentTouchId = null;
+        // Detach from current workstation, if any
+        if (currentWorkStation != null)
+        {
+            Debug.Log($"Picking up {gameObject.name} from workstation {currentWorkStation.name}");
+            previousWorkStation = currentWorkStation;
+            currentWorkStation.RemoveIngredient();
+            currentWorkStation = null;
+            isFromBasket = false;
+        }
+
+        Debug.Log($"Object {gameObject.name} picked up by touch {touchId}, IsFromBasket: {isFromBasket}");
+    }
+
+    public void OnTouchMove(int touchId, Vector3 position)
+    {
+        if (currentWorkStation != null)
+        {
+            Debug.Log($"Object {gameObject.name} is currently on workstation {currentWorkStation.name}, ignoring move.");
+            return;
+        }
+
+        transform.position = position;
+    }
+
+    public void OnTouchDrop(int touchId, Vector2 screenPosition)
+    {
+        if (!TryDropObject(screenPosition))
+        {
+            OnPickFailed();
         }
     }
 
-    public virtual void OnPickFailed()
+    public void OnPickFailed()
     {
         if (!isFromBasket && previousWorkStation != null)
         {
             Debug.Log($"Pick failed, returning {gameObject.name} to previous workstation");
-            transform.position = OriginalPosition;
+            transform.position = originalPosition;
+
             if (previousWorkStation.TryPlaceIngredient(gameObject))
             {
                 currentWorkStation = previousWorkStation;
                 previousWorkStation = null;
-                return;
             }
+            return;
         }
-        
-        Debug.Log($"Pick failed and from basket or no valid workstation, destroying {gameObject.name}");
+
+        Debug.Log($"Pick failed and no valid workstation available, destroying {gameObject.name}");
         Destroy(gameObject);
     }
-    
 
-    protected virtual bool TryDropObject(Vector2 screenPosition)
+    protected bool TryDropObject(Vector2 screenPosition)
     {
+        if (mainCamera == null) return false;
+
         Ray ray = mainCamera.ScreenPointToRay(screenPosition);
-        
-        var ownCollider = GetComponent<Collider>();
-        if (ownCollider != null)
-        {
-            ownCollider.enabled = false;
-        }
-        
         RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
-        
-        if (ownCollider != null)
-        {
-            ownCollider.enabled = true;
-        }
 
-        if (IsOverTrash(hits))
-        {
-            Debug.Log($"Dropping {gameObject.name} in trash - destroying object");
-            Destroy(gameObject);
-            return true;
-        }
-
-        bool foundWorkstation = false;
         foreach (var hit in hits)
         {
-            if (hit.collider.gameObject == gameObject) continue;
-            WorkStation newStation = hit.collider.GetComponent<WorkStation>();
-            if (newStation != null)
+            WorkStation workstation = hit.collider.GetComponent<WorkStation>();
+            if (workstation != null)
             {
-                foundWorkstation = true;
-                Debug.Log($"Attempting to place on workstation: {newStation.name}");
-                if (!isFromBasket && newStation == previousWorkStation)
+                Debug.Log($"Attempting to place {gameObject.name} on workstation: {workstation.name}");
+                if (workstation.TryPlaceIngredient(gameObject))
                 {
-                    Debug.Log($"Dropping back on previous workstation: {newStation.name}");
-                    bool success = newStation.TryPlaceIngredient(gameObject);
-                    if (success) 
-                    {
-                        currentWorkStation = newStation;
-                        isFromBasket = false;
-                    }
-                    return success;
-                }
-                
-                if (newStation.TryPlaceIngredient(gameObject))
-                {
-                    Debug.Log($"Successfully moved to new workstation: {newStation.name}");
-                    currentWorkStation = newStation;
+                    currentWorkStation = workstation;
                     previousWorkStation = null;
                     isFromBasket = false;
                     return true;
@@ -134,43 +100,13 @@ public class PickableObject : MonoBehaviour, IPickable
             }
         }
 
-        if (!foundWorkstation)
-        {
-            Debug.Log($"No workstation found during drop for {gameObject.name}");
-        }
-        
-        if (!isFromBasket && previousWorkStation != null)
-        {
-            Debug.Log($"Dropped outside, returning to previous workstation: {previousWorkStation.name}");
-            transform.position = OriginalPosition;
-            bool success = previousWorkStation.TryPlaceIngredient(gameObject);
-            if (success)
-            {
-                currentWorkStation = previousWorkStation;
-                return true;
-            }
-        }
-        
-        Debug.Log($"Object is from basket or has no previous workstation, destroying {gameObject.name}");
-        Destroy(gameObject);
-        return true;
-    }
-
-    private bool IsOverTrash(RaycastHit[] hits)
-    {
-        foreach (var hit in hits)
-        {
-            if (hit.collider.CompareTag("Trash"))
-            {
-                return true;
-            }
-        }
+        Debug.Log($"No valid workstation found for {gameObject.name}");
         return false;
     }
 
-    public void SetCurrentWorkStation(WorkStation station)
+    public void SetCurrentWorkStation(WorkStation workstation)
     {
-        currentWorkStation = station;
+        currentWorkStation = workstation;
         isFromBasket = false;
     }
 
@@ -178,5 +114,4 @@ public class PickableObject : MonoBehaviour, IPickable
     {
         return currentWorkStation;
     }
-    
 }

@@ -41,7 +41,7 @@ public class SliceDetector : MonoBehaviour
 
                 // Check if the object has a BaseIngredient component
                 BaseIngredient ingredient = clickedObject.GetComponent<BaseIngredient>();
-                if (ingredient != null && ingredient is ISliceable sliceableIngredient)
+                if (ingredient != null && ingredient is ISliceable sliceableIngredient && ingredient.GetCurrentWorkStation().GetStationType()==ProcessType.Cut)
                 {
                     // Call the Slice method
                     if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
@@ -49,7 +49,7 @@ public class SliceDetector : MonoBehaviour
                 }
                 else
                 {
-                    if (debugMode) Debug.Log($"Object clicked is not sliceable: {clickedObject.name}");
+                    if (debugMode) Debug.Log($"Object clicked is not sliceable: {clickedObject.name} or not on a cutting station");
                 }
             }
         }

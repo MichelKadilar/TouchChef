@@ -7,14 +7,14 @@ public class Pan : BaseContainer
     private Quaternion lastValidRotation;
     private WorkStation lastWorkStation;
 
-    protected override void Awake()
+    protected void Awake()
     {
         base.Awake();
         lastValidPosition = transform.position;
         lastValidRotation = transform.rotation;
     }
 
-    public override void OnTouchPick(int touchId)
+    public void OnTouchPick(int touchId)
     {
         if (!holdDetector.IsHolding)
         {

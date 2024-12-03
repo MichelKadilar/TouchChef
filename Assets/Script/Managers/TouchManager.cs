@@ -85,7 +85,7 @@ public class TouchManager : MonoBehaviour
             targetObject = GetTouchedObject(position)
         };
         
-        bool isAnyObjectDragged = FindObjectsOfType<MonoBehaviour>()
+        /*bool isAnyObjectDragged = FindObjectsOfType<MonoBehaviour>()
             .OfType<IPickable>()
             .Any(p => p.IsBeingDragged);
 
@@ -93,7 +93,7 @@ public class TouchManager : MonoBehaviour
         {
             Debug.Log("An object is already being dragged");
             return;
-        }
+        }*/
         
         Ray ray = mainCamera.ScreenPointToRay(position);
         RaycastHit[] hits = Physics.RaycastAll(ray, 100f, interactableLayer);
