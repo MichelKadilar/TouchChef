@@ -1,15 +1,20 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SliceDetector : MonoBehaviour
 {
     [Header("Slice Configuration")]
-    [SerializeField] private LayerMask ingredientLayer; // Layer for ingredients
-    [SerializeField] private float raycastDistance = 100f; // Max raycast distance
+    [SerializeField] private LayerMask ingredientLayer;
+    [SerializeField] private float raycastDistance = 100f;
+    [SerializeField] private float multiTouchDelay = 0.5f;
 
     [Header("Debug")]
-    [SerializeField] private bool debugMode = true; // Toggle debug messages
+    [SerializeField] private bool debugMode = true;
 
     private Camera mainCamera;
+    private bool wasRightMousePressed = false;
+    private float lastTouchTime;
+    private int touchCount;
 
     private void Awake()
     {
@@ -22,35 +27,94 @@ public class SliceDetector : MonoBehaviour
 
     private void Update()
     {
-        DetectSliceInput();
+        // Handle mouse input for slicing
+        if (Mouse.current != null)
+        {
+            bool isRightMousePressed = Mouse.current.rightButton.isPressed;
+            
+            // Detect right mouse button press
+            if (isRightMousePressed && !wasRightMousePressed)
+            {
+                Vector2 mousePosition = Mouse.current.position.ReadValue();
+                HandleSliceAtPosition(mousePosition);
+            }
+            
+            wasRightMousePressed = isRightMousePressed;
+        }
+
+        // Handle touch input for slicing
+        if (Touchscreen.current != null)
+        {
+            HandleTouchSlicing();
+        }
     }
 
-    private void DetectSliceInput()
+    private void HandleTouchSlicing()
     {
-        if (Input.GetMouseButtonDown(1)) // Right mouse button click
+        var touches = Touchscreen.current.touches;
+        int currentTouchCount = 0;
+
+        // Count active touches
+        foreach (var touch in touches)
         {
-            if (debugMode) Debug.Log("/.//////////////////////// Right mouse button clicked.");
-
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            // Perform raycast to detect ingredients
-            if (Physics.Raycast(ray, out hit, raycastDistance, ingredientLayer))
+            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
             {
-                GameObject clickedObject = hit.collider.gameObject;
+                currentTouchCount++;
+            }
+        }
 
-                // Check if the object has a BaseIngredient component
-                BaseIngredient ingredient = clickedObject.GetComponent<BaseIngredient>();
-                if (ingredient != null && ingredient is ISliceable sliceableIngredient && ingredient.GetCurrentWorkStation().GetStationType()==ProcessType.Cut)
+        // Check for multi-touch within the time window
+        if (currentTouchCount > 0)
+        {
+            float currentTime = Time.time;
+            if (currentTime - lastTouchTime <= multiTouchDelay)
+            {
+                touchCount += currentTouchCount;
+                if (touchCount >= 2)
                 {
-                    // Call the Slice method
-                    if (debugMode) Debug.Log($"/.//////////////////////// Slicing ingredient: {clickedObject.name}");
-                    sliceableIngredient.Slice();
+                    // Get the position of the last touch for slicing
+                    foreach (var touch in touches)
+                    {
+                        if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+                        {
+                            Vector2 touchPosition = touch.position.ReadValue();
+                            HandleSliceAtPosition(touchPosition);
+                            break;
+                        }
+                    }
+                    touchCount = 0;
                 }
-                else
-                {
-                    if (debugMode) Debug.Log($"/.//////////////////////// Object clicked is not sliceable: {clickedObject.name} or not on a cutting station");
-                }
+            }
+            else
+            {
+                touchCount = currentTouchCount;
+            }
+            lastTouchTime = currentTime;
+        }
+    }
+
+    private void HandleSliceAtPosition(Vector2 position)
+    {
+        if (debugMode) Debug.Log($"Attempting slice at position: {position}");
+
+        Ray ray = mainCamera.ScreenPointToRay(position);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, raycastDistance, ingredientLayer))
+        {
+            GameObject clickedObject = hit.collider.gameObject;
+            BaseIngredient ingredient = clickedObject.GetComponent<BaseIngredient>();
+
+            if (ingredient != null && 
+                ingredient is ISliceable sliceableIngredient && 
+                ingredient.GetCurrentWorkStation()?.GetStationType() == ProcessType.Cut)
+            {
+                if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
+                sliceableIngredient.Slice();
+            }
+            else
+            {
+                if (debugMode) Debug.Log($"Object not sliceable or not on cutting station: {clickedObject.name}");
             }
         }
     }
