@@ -1,0 +1,11 @@
+Model Information:
+* title:	Trash Can with animations. Garbage Can animated
+* source:	https://sketchfab.com/3d-models/trash-can-with-animations-garbage-can-animated-d4bed4900def46e7b2f098b0a9ec6209
+* author:	AmongModels (https://sketchfab.com/amongmodels)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Trash Can with animations. Garbage Can animated" (https://sketchfab.com/3d-models/trash-can-with-animations-garbage-can-animated-d4bed4900def46e7b2f098b0a9ec6209) by AmongModels (https://sketchfab.com/amongmodels) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
