@@ -108,7 +108,17 @@ public class PickableObject : MonoBehaviour , IPickable
 
         foreach (var hit in hits)
         {
-            Debug.Log("------ Hit object: " + hit.collider.gameObject.name);
+            // Vérifier si c'est une poubelle
+            TrashCan trashCan = hit.collider.GetComponent<TrashCan>();
+            if (trashCan != null && trashCan.IsOpen)
+            {
+                Debug.Log($"Throwing {gameObject.name} in trash can successfully");
+                trashCan.PlayThrowSound();
+                Destroy(gameObject);
+                return true;
+            }
+            
+            
             ConveyorSystem conveyor = hit.collider.GetComponent<ConveyorSystem>();
             if (conveyor != null)
             {
@@ -125,10 +135,6 @@ public class PickableObject : MonoBehaviour , IPickable
                     isFromConveyor = true;
                     this.conveyorSystem = conveyor;
                     return true;
-                }
-                else
-                {
-                    Debug.Log($"Failed to place {gameObject.name} on conveyor");
                 }
             }
             

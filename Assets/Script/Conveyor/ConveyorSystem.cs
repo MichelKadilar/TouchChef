@@ -199,12 +199,35 @@ namespace Script.Conveyor
         
         public bool AddExistingProduct(GameObject product)
         {
+            float minDistance;
+            int nearestPointIndex;
+            
             if (activeProducts.Contains(product))
-                return false;
+            {
+                // Trouver le point le plus proche
+                minDistance = float.MaxValue;
+                nearestPointIndex = 0;
+        
+                for (int i = 0; i < conveyorPoints.Length; i++)
+                {
+                    float distance = Vector3.Distance(product.transform.position, conveyorPoints[i].position);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        nearestPointIndex = i;
+                    }
+                }
+
+                // Repositionner et réactiver le produit
+                product.transform.position = conveyorPoints[nearestPointIndex].position;
+                productTargetPoints[product] = (nearestPointIndex + 1) % conveyorPoints.Length;
+                pausedProducts[product] = false;
+                return true;
+            }
 
             // Trouver le point le plus proche pour placer l'objet
-            float minDistance = float.MaxValue;
-            int nearestPointIndex = 0;
+            minDistance = float.MaxValue;
+            nearestPointIndex = 0;
     
             for (int i = 0; i < conveyorPoints.Length; i++)
             {
