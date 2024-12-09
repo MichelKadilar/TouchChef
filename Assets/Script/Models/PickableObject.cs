@@ -1,11 +1,14 @@
-﻿using UnityEngine;
+﻿using Script.Conveyor;
+using UnityEngine;
 
 public class PickableObject : MonoBehaviour , IPickable
 {
     protected Camera mainCamera;
     private WorkStation currentWorkStation = null;
     private WorkStation previousWorkStation = null;
+    private ConveyorSystem conveyorSystem = null;
     private bool isFromBasket = true;
+    private bool isFromConveyor = false;
 
     private Vector3 originalPosition;
 
@@ -35,8 +38,20 @@ public class PickableObject : MonoBehaviour , IPickable
             currentWorkStation = null;
             isFromBasket = false;
         }
+        if (isFromConveyor && conveyorSystem != null)
+        {
+            conveyorSystem.PauseProduct(gameObject);
+        }
 
-        Debug.Log($"Object {gameObject.name} picked up by touch {touchId}, IsFromBasket: {isFromBasket}");
+        Debug.Log($"Object {gameObject.name} picked up by touch {touchId}, IsFromBasket: {isFromBasket}, IsFromConveyor: {isFromConveyor}");
+    }
+    
+    public void InitializeConveyor(ConveyorSystem system)
+    {
+        Debug.Log("Initializing conveyor for object: " + gameObject.name);
+        conveyorSystem = system;
+        isFromConveyor = true;
+        isFromBasket = false;
     }
 
     public void OnTouchMove(int touchId, Vector3 position)
@@ -72,6 +87,13 @@ public class PickableObject : MonoBehaviour , IPickable
             }
             return;
         }
+        
+        if (isFromConveyor && conveyorSystem != null)
+        {
+            Debug.Log($"Pick failed, returning {gameObject.name} to conveyor");
+            conveyorSystem.ReturnProductToNearestPoint(gameObject);
+            return;
+        }
 
         Debug.Log($"Pick failed and no valid workstation available, destroying {gameObject.name}");
         Destroy(gameObject);
@@ -86,6 +108,30 @@ public class PickableObject : MonoBehaviour , IPickable
 
         foreach (var hit in hits)
         {
+            Debug.Log("------ Hit object: " + hit.collider.gameObject.name);
+            ConveyorSystem conveyor = hit.collider.GetComponent<ConveyorSystem>();
+            if (conveyor != null)
+            {
+                Debug.Log($"Attempting to place {gameObject.name} on conveyor");
+                if (conveyor.AddExistingProduct(gameObject))
+                {
+                    if (currentWorkStation != null)
+                    {
+                        currentWorkStation.RemoveIngredient();
+                    }
+                    currentWorkStation = null;
+                    previousWorkStation = null;
+                    isFromBasket = false;
+                    isFromConveyor = true;
+                    this.conveyorSystem = conveyor;
+                    return true;
+                }
+                else
+                {
+                    Debug.Log($"Failed to place {gameObject.name} on conveyor");
+                }
+            }
+            
             WorkStation workstation = hit.collider.GetComponent<WorkStation>();
             if (workstation != null)
             {
@@ -100,7 +146,7 @@ public class PickableObject : MonoBehaviour , IPickable
             }
         }
 
-        Debug.Log($"No valid workstation found for {gameObject.name}");
+        Debug.Log($"No valid workstation or conveyor found for {gameObject.name}");
         return false;
     }
 

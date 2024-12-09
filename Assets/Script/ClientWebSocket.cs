@@ -10,7 +10,7 @@ public class ClientWebSocket : MonoBehaviour
   // Start is called before the first frame update
   async void Start()
   {
-    _websocket = new WebSocket("ws://websocket.chhilif.com:8080");
+    _websocket = new WebSocket("ws://websocket.chhilif.com/ws");
 
     _websocket.OnOpen += () =>
     {
