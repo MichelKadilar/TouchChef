@@ -20,7 +20,7 @@ public class Basket : MonoBehaviour
             Mathf.Abs(Camera.main.transform.position.z + 10)
         ));
         
-        Quaternion rotation = Quaternion.Euler(0f, 180f, 0f);
+        Quaternion rotation = Quaternion.Euler(0f, 0f, 0f);
 
         GameObject ingredient = Instantiate(ingredientPrefab, worldPosition, rotation);
         Debug.Log($"Created ingredient: {ingredient.name} at position {worldPosition} with Y rotation 180");
