@@ -1034,8 +1034,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dcc0e269b1f487295cf6e662ab262b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stationType: 0
-  ingredientPosition: {fileID: 0}
+  stationType: 2
+  ingredientPosition: {fileID: 2059889591}
   processRadius: 1
   workStationPosition: 0
   isCookingStation: 0
@@ -2666,6 +2666,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   openSound: {fileID: 8300000, guid: 792763f75b4c8411a9024049b8fee797, type: 3}
   closeSound: {fileID: 8300000, guid: df9269fcd18674ef9aa0b0c20d985733, type: 3}
+  throwSound: {fileID: 0}
 --- !u!4 &969075693 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7435bf658de11d94eb0d434625cbb1a9, type: 3}
@@ -6983,7 +6984,7 @@ MonoBehaviour:
   processRadius: 1
   workStationPosition: 0
   isCookingStation: 1
-  panPrefab: {fileID: 0}
+  panPrefab: {fileID: 399742943}
   availableVisual: {fileID: 0}
   processingVisual: {fileID: 0}
   invalidPlacementVisual: {fileID: 0}
@@ -7894,6 +7895,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.8895817, y: 3.7916303, z: 1}
   m_Center: {x: -0.024487495, y: 0.00000023841858, z: 0}
+--- !u!4 &2059889591 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7253146347491586435, guid: b097756f5e7a4f74e90c1bd551bd7f41, type: 3}
+  m_PrefabInstance: {fileID: 6723840810657495373}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2070028531
 GameObject:
   m_ObjectHideFlags: 0
