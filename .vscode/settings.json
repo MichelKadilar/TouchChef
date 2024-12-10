@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "TouchChef.sln"
+    "dotnet.defaultSolution": "TouchChef.sln",
+    "dotnet.preferCSharpExtension": true
 }
