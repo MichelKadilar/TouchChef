@@ -4,38 +4,41 @@ using UnityEngine;
 public class WorkStationHighlight : MonoBehaviour
 {
     [Header("Highlight Settings")]
-    [SerializeField] private Color defaultHighlightColor = Color.yellow;
     [SerializeField] private float outlineWidth = 4f;
     [SerializeField] private float pulseSpeed = 1f;
     [SerializeField] private float pulseMinIntensity = 0.6f;
     [SerializeField] private float pulseMaxIntensity = 1f;
+    [SerializeField] private bool highlightEnabled = false;  // Pour tester dans l'inspecteur
+    [SerializeField] private Color testColor = Color.red;    // Pour tester dans l'inspecteur
 
     private Outline outlineComponent;
     private bool isHighlighted = false;
     private Color currentHighlightColor;
     private float currentPulseTime = 0f;
+    private WorkStation workStation;
 
     private void Awake()
     {
-        // S'assurer que nous avons un composant Outline
+        workStation = GetComponent<WorkStation>();
+        
         outlineComponent = GetComponent<Outline>();
         if (outlineComponent == null)
         {
             outlineComponent = gameObject.AddComponent<Outline>();
         }
         
-        // Configuration initiale de l'Outline
         outlineComponent.OutlineMode = Outline.Mode.OutlineAll;
         outlineComponent.OutlineWidth = outlineWidth;
-        outlineComponent.enabled = false; // Désactivé par défaut
-        
-        currentHighlightColor = defaultHighlightColor;
+        outlineComponent.enabled = false;
     }
 
-    private void Start()
+    private void OnValidate()
     {
-        // Activer l'outline en rouge par défaut pour les tests
-        SetHighlight(true, Color.red);
+        // Cette fonction est appelée quand une valeur est modifiée dans l'inspecteur
+        if (Application.isPlaying && outlineComponent != null)
+        {
+            SetHighlight(highlightEnabled, testColor);
+        }
     }
 
     public void SetHighlight(bool enabled, Color? color = null)
@@ -44,6 +47,12 @@ public class WorkStationHighlight : MonoBehaviour
 
         isHighlighted = enabled;
         outlineComponent.enabled = enabled;
+        
+        if (!enabled)
+        {
+            currentPulseTime = 0f;
+            return;
+        }
         
         if (color.HasValue)
         {
@@ -56,7 +65,6 @@ public class WorkStationHighlight : MonoBehaviour
     {
         if (isHighlighted && outlineComponent != null && outlineComponent.enabled)
         {
-            // Effet de pulsation
             currentPulseTime += Time.deltaTime * pulseSpeed;
             float pulseIntensity = Mathf.Lerp(pulseMinIntensity, pulseMaxIntensity, 
                 (Mathf.Sin(currentPulseTime) + 1f) * 0.5f);
@@ -64,5 +72,15 @@ public class WorkStationHighlight : MonoBehaviour
             Color pulseColor = currentHighlightColor * pulseIntensity;
             outlineComponent.OutlineColor = pulseColor;
         }
+    }
+
+    public WorkStation GetWorkStation()
+    {
+        return workStation;
+    }
+
+    public bool IsHighlighted()
+    {
+        return isHighlighted;
     }
 }
