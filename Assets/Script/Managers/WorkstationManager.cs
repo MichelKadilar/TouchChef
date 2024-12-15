@@ -125,12 +125,14 @@ public class WorkstationManager : MonoBehaviour
         foreach (var station in allWorkstations)
         {
             bool isOccupied = playerWorkstations.ContainsValue(station);
-            Debug.Log($"- Station '{station.gameObject.name}' : Type={station.GetStationType()}, Occupée={isOccupied}");
+            bool isTableStation = station is TableStation;  // Nouvelle vérification
+            Debug.Log($"- Station '{station.gameObject.name}' : Type={station.GetStationType()}, Occupée={isOccupied}, EstTableStation={isTableStation}");
         }
 
         var availableStation = allWorkstations.Find(ws => 
             !playerWorkstations.ContainsValue(ws) && 
-            ws.GetStationType() == type);
+            ws.GetStationType() == type &&
+            !(ws is TableStation));  // Ajout du filtre pour exclure les TableStation
 
         if (availableStation != null)
         {

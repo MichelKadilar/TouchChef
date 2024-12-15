@@ -98,34 +98,28 @@ public class ClientWebSocket : MonoBehaviour
             return;
         }
 
-        try
+        try 
         {
-            // D'abord essayer de parser comme message de tâche
+            // D'abord essayer comme message de produit
+            WebSocketMessage productMessage = JsonUtility.FromJson<WebSocketMessage>(message);
+            if (productMessage.type == "add_product")
+            {
+                Debug.Log("ClientWebSocket: Message de produit détecté");
+                HandleProductMessage(productMessage);
+                return;
+            }
+        
+            // Si ce n'est pas un produit, essayer comme message de tâche
             WebSocketTaskMessage taskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
-            
             if (!string.IsNullOrEmpty(taskMessage.type))
             {
                 Debug.Log($"ClientWebSocket: Message de tâche détecté - Type: {taskMessage.type}");
                 HandleTaskMessage(taskMessage);
-                return;
             }
         }
-        catch
+        catch (Exception e)
         {
-            // Essayer ensuite comme message de produit
-            try
-            {
-                WebSocketMessage productMessage = JsonUtility.FromJson<WebSocketMessage>(message);
-                if (productMessage.type == "add_product")
-                {
-                    Debug.Log("ClientWebSocket: Message de produit détecté");
-                    HandleProductMessage(productMessage);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"ClientWebSocket: Erreur de parsing: {e.Message}");
-            }
+            Debug.LogError($"ClientWebSocket: Erreur de parsing: {e.Message}");
         }
     }
 
