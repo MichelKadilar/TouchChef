@@ -8651,6 +8651,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   raycastDistance: 100
+  minWashDistance: 1
+  multiTouchDelay: 0.5
+  audioSource: {fileID: 0}
+  washSound: {fileID: 8300000, guid: 091a1c082cb671f4ea7271fca1166ed8, type: 3}
+  washSoundVolume: 1
+  minTimeBetweenSounds: 0.1
   debugMode: 1
 --- !u!114 &2133961572
 MonoBehaviour:
