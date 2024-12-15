@@ -39,6 +39,11 @@ public class WorkStation : MonoBehaviour
         }
         UpdateVisuals();
     }
+    
+    public string GetAssignedPlayerId()
+    {
+        return WorkstationManager.Instance?.GetPlayerIdForWorkstation(this);
+    }
 
     private void InitializeCookingPan()
     {

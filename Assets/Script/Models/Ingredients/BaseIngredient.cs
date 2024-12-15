@@ -71,6 +71,33 @@ public abstract class BaseIngredient : PickableObject, IProcessable
         StartCoroutine(ProcessingCoroutine(processType));
     }
     
+    protected void NotifyActionProgress(string actionType)
+    {
+        var workstation = GetCurrentWorkStation();
+        if (workstation != null)
+        {
+            string playerId = workstation.GetAssignedPlayerId();
+            if (!string.IsNullOrEmpty(playerId))
+            {
+                Debug.Log($"Notification de progression pour le joueur {playerId} - Action: {actionType}");
+                WorkstationManager.Instance?.UpdateTaskProgress(workstation, actionType);
+            }
+            else
+            {
+                Debug.LogWarning($"Pas de joueur assigné à la workstation pour {gameObject.name}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Pas de workstation pour {gameObject.name}");
+        }
+    }
+    
+    public virtual float GetProcessingTimer()
+    {
+        return 0f; // Les ingrédients de base retournent 0
+    }
+    
     public virtual bool CanStartProcessing(ProcessType processType)
     {
         bool isBeingDragged = DraggingManager.Instance.IsBeingDragged((IPickable) this);

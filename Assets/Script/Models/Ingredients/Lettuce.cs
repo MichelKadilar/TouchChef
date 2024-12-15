@@ -73,7 +73,7 @@ public class Lettuce : BaseIngredient, ISliceable, IWashable
                 Debug.Log("CURRENT STATE : CUT");
                 currentState = IngredientState.Cut;
                 _slider.gameObject.SetActive(false);
-                
+                NotifyActionProgress("cut");
             }
         }
         UpdateVisual();
@@ -87,6 +87,7 @@ public class Lettuce : BaseIngredient, ISliceable, IWashable
     public void StopWash()
     {
         waterVisual.SetActive(false);
+        NotifyActionProgress("wash");
     }
     
     private void UpdateVisual()

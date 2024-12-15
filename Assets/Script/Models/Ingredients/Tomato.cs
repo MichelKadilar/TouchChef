@@ -71,6 +71,7 @@ public class Tomato : BaseIngredient, ISliceable
                 currentState = IngredientState.Cut;
                 _slider.gameObject.SetActive(false);
                 UpdateVisual();
+                NotifyActionProgress("cut");
             }
             
             

@@ -962,5 +962,8 @@ MonoBehaviour:
   cutVisual: {fileID: 4434910095710766952}
   cookedVisual: {fileID: 1875637589392485258}
   burnedVisual: {fileID: 768186155601357190}
+  audioSource: {fileID: 0}
+  cookingSound: {fileID: 8300000, guid: 32355dc844cdf6448aaf15be42148044, type: 3}
+  burningSound: {fileID: 8300000, guid: eee3c173bc7e61a45a7d6c515286bf9d, type: 3}
   neededSlices: 5
   burnTime: 6
