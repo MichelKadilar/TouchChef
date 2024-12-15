@@ -108,6 +108,17 @@ public class PickableObject : MonoBehaviour , IPickable
 
         foreach (var hit in hits)
         {
+            DeliveryZone deliveryZone = hit.collider.GetComponent<DeliveryZone>();
+            if (deliveryZone != null)
+            {
+                // Vérifier si l'ingrédient est valide pour la livraison
+                var ingredient = GetComponent<BaseIngredient>();
+                if (ingredient != null)
+                {
+                    return deliveryZone.TryDeliverIngredient(ingredient);
+                }
+                return false;
+            }
             // Vérifier si c'est une poubelle
             TrashCan trashCan = hit.collider.GetComponent<TrashCan>();
             if (trashCan != null && trashCan.IsOpen)

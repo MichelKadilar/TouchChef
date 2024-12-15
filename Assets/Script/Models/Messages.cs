@@ -68,3 +68,12 @@ public class TaskCompletionMessage
     public string to = "angular";
     public TaskProgressData progressData;
 }
+
+[System.Serializable]
+public class DeliveryScoreMessage
+{
+    public string type = "updatescore";
+    public string from = "table";
+    public string to = "angular";
+    public string ingredientState;
+}

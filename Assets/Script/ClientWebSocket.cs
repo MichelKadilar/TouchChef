@@ -89,8 +89,11 @@ public class ClientWebSocket : MonoBehaviour
     private void HandleWebSocketMessage(byte[] bytes)
     {
         string message = System.Text.Encoding.UTF8.GetString(bytes);
+        if (message.Contains("heartrate"))
+        {
+            return;
+        }
         Debug.Log($"ClientWebSocket: Message reçu: {message}");
-
         if (message.Contains("startGame"))
         {
             Debug.Log("ClientWebSocket: Commande de démarrage du jeu reçue");
