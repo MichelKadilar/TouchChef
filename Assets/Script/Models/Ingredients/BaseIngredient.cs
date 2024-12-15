@@ -93,6 +93,11 @@ public abstract class BaseIngredient : PickableObject, IProcessable
         }
     }
     
+    public virtual float GetProcessingTimer()
+    {
+        return 0f; // Les ingrédients de base retournent 0
+    }
+    
     public virtual bool CanStartProcessing(ProcessType processType)
     {
         bool isBeingDragged = DraggingManager.Instance.IsBeingDragged((IPickable) this);

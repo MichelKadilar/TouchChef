@@ -90,14 +90,16 @@ public class Meat : BaseIngredient, ISliceable
                     currentState = IngredientState.Cut;
                     allowedProcesses.Clear();
                     allowedProcesses.Add(ProcessType.Cook);
+                    NotifyActionProgress("cut");  // On peut notifier directement pour le cut
                     break;
+            
                 case ProcessType.Cook:
                     if (cookingTimer < burnTime)
                     {
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
                         isProcessing = false;
-                        NotifyActionProgress("cook");
+                        StartCoroutine(WaitForRemoval());  // Ajout du coroutine d'attente
                     }
                     else if (cookingTimer >= burnTime && this.GetCurrentWorkStation().GetStationType() == ProcessType.Cook)
                     {
@@ -107,6 +109,60 @@ public class Meat : BaseIngredient, ISliceable
                     break;
             }
             UpdateVisual();
+        }
+        private IEnumerator WaitForRemoval()
+        {
+            float timeoutDuration = 3f;
+            float elapsedTime = 0f;
+            WorkStation initialStation = GetCurrentWorkStation();
+            string originalPlayerId = initialStation?.GetAssignedPlayerId(); // Stockage du playerId original
+            bool hasBeenMoved = false;
+
+            // Si pas de playerId au départ, on abandonne
+            if (string.IsNullOrEmpty(originalPlayerId))
+            {
+                Debug.LogWarning("No player assigned to initial cooking station");
+                yield break;
+            }
+
+            yield return null;
+
+            while (elapsedTime < timeoutDuration)
+            {
+                WorkStation currentStation = GetCurrentWorkStation();
+        
+                if (currentStation == null)
+                {
+                    hasBeenMoved = true;
+                }
+                else if (hasBeenMoved && currentStation != initialStation)
+                {
+                    Debug.Log($"Steak moved to new station - Sending notification for player {originalPlayerId}");
+                    // Notification manuelle avec le playerId original
+                    if (WorkstationManager.Instance != null)
+                    {
+                        WorkstationManager.Instance.UpdateTaskProgress(initialStation, "cook");
+                    }
+                    yield break;
+                }
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            WorkStation finalStation = GetCurrentWorkStation();
+            if (!hasBeenMoved && finalStation != null && finalStation.GetStationType() == ProcessType.Cook)
+            {
+                Debug.Log("Steak timeout - Setting to burned");
+                currentState = IngredientState.Burned;
+                allowedProcesses.Clear();
+                UpdateVisual();
+            }
+        }
+        
+        public override float GetProcessingTimer()
+        {
+            return cookingTimer;
         }
 
         protected override IEnumerator ProcessingCoroutine(ProcessType processType)

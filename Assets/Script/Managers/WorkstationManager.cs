@@ -79,7 +79,13 @@ public class WorkstationManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"WorkstationManager: Aucune station disponible pour le type {requiredType}");
+            var errorMessage = new WebSocketMessage
+            {
+                type = "workstation_unavailable",
+                from = "unity",
+                to = playerId
+            };
+            ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(errorMessage));
         }
 
         var progressData = new TaskProgressData
@@ -137,16 +143,6 @@ public class WorkstationManager : MonoBehaviour
             progressData = taskData
         };
         ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(progressMessage));
-
-        if (taskData.currentProgress >= taskData.targetProgress)
-        {
-            var completionMessage = new TaskCompletionMessage
-            {
-                progressData = taskData
-            };
-            ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(completionMessage));
-            activeTasks.Remove(playerId);
-        }
     }
     
     private bool IsActionValidForTask(string actionType, string taskName)
