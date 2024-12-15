@@ -4,6 +4,10 @@ using System;
 
 public class WorkstationManager : MonoBehaviour
 {
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip stationAssignedSound;
+    [SerializeField] private AudioClip stationUnavailableSound;
     private static WorkstationManager instance;
     public static WorkstationManager Instance
     {
@@ -28,6 +32,10 @@ public class WorkstationManager : MonoBehaviour
         {
             instance = this;
             InitializeWorkstations();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
         }
         else
         {
@@ -76,9 +84,17 @@ public class WorkstationManager : MonoBehaviour
             Debug.Log($"WorkstationManager: Station disponible trouvée pour le type {requiredType}");
             AssignWorkstation(availableStation, playerId, message.assignedTask.cook.color);
             workstationPlayers[availableStation] = playerId;
+            if (audioSource != null && stationAssignedSound != null)
+            {
+                audioSource.PlayOneShot(stationAssignedSound);
+            }
         }
         else
         {
+            if (audioSource != null && stationUnavailableSound != null)
+            {
+                audioSource.PlayOneShot(stationUnavailableSound);
+            }
             var errorMessage = new WebSocketMessage
             {
                 type = "workstation_unavailable",
