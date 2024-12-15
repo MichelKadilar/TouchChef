@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class WorkstationManager : MonoBehaviour
 {
@@ -64,7 +65,7 @@ public class WorkstationManager : MonoBehaviour
         }
 
         string playerId = message.assignedTask.cook.deviceId;
-        ProcessType requiredType = DetermineProcessType(message.assignedTask.taskName);
+        ProcessType requiredType = DetermineProcessType(message.assignedTask.workstation);
         Debug.Log($"WorkstationManager: Tâche reçue - Joueur: {playerId}, Type requis: {requiredType}");
 
         if (playerWorkstations.TryGetValue(playerId, out WorkStation currentStation))
@@ -107,9 +108,9 @@ public class WorkstationManager : MonoBehaviour
         var progressData = new TaskProgressData
         {
             playerId = playerId,
-            taskName = message.assignedTask.taskName,
+            taskId = message.assignedTask.taskId,
             currentProgress = 0,
-            targetProgress = ExtractTargetValue(message.assignedTask.taskName)
+            targetProgress = int.Parse(message.assignedTask.quantity)
         };
         activeTasks[playerId] = progressData;
     }
@@ -136,44 +137,68 @@ public class WorkstationManager : MonoBehaviour
 
     public void UpdateTaskProgress(WorkStation workstation, string actionType)
     {
+        // Vérifier si le workstation est associé à un joueur
         if (!workstationPlayers.TryGetValue(workstation, out string playerId))
         {
+            Debug.LogWarning("Pas de joueur associé à cette workstation");
             return;
         }
 
+        // Vérifier si le joueur a une tâche active
         if (!activeTasks.TryGetValue(playerId, out TaskProgressData taskData))
         {
+            Debug.LogWarning($"Pas de tâche active pour le joueur {playerId}");
             return;
         }
-        
-        if (!IsActionValidForTask(actionType, taskData.taskName))
+    
+        // Vérifier si l'action correspond à la workstation de la tâche
+        if (!IsActionValidForTask(actionType, workstation.GetStationType().ToString()))
         {
-            Debug.Log($"Action {actionType} ne correspond pas à la tâche {taskData.taskName}");
+            Debug.Log($"Action {actionType} ne correspond pas au type de workstation {workstation.GetStationType()}");
             return;
         }
 
         taskData.currentProgress++;
-
+    
+        // Créer et envoyer le message de progression
         var progressMessage = new TaskProgressMessage
         {
-            progressData = taskData
+            type = "taskProgress",
+            from = "unity",
+            to = "angular",
+            progressData = new TaskProgressData
+            {
+                playerId = playerId,
+                taskId = taskData.taskId,
+                currentProgress = taskData.currentProgress,
+                targetProgress = taskData.targetProgress
+            }
         };
-        ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(progressMessage));
+
+        string jsonMessage = JsonUtility.ToJson(progressMessage);
+        Debug.Log($"Envoi du message de progression: {jsonMessage}");
+        ClientWebSocket.Instance?.SendMessage(jsonMessage);
+
+        // Vérifier si la tâche est terminée
+        if (taskData.currentProgress >= taskData.targetProgress)
+        {
+            Debug.Log($"Tâche {taskData.taskId} terminée pour le joueur {playerId}");
+            activeTasks.Remove(playerId);
+        }
     }
     
-    private bool IsActionValidForTask(string actionType, string taskName)
+    private bool IsActionValidForTask(string actionType, string workstationType)
     {
         switch (actionType.ToLower())
         {
             case "cut":
-                return taskName.ToLower().Contains("couper") || 
-                       taskName.ToLower().Contains("découper");
+                return workstationType.Equals("Cut", System.StringComparison.OrdinalIgnoreCase);
             case "cook":
-                return taskName.ToLower().Contains("cuire") || 
-                       taskName.ToLower().Contains("préparer");
+                return workstationType.Equals("Cook", System.StringComparison.OrdinalIgnoreCase);
             case "wash":
-                return taskName.ToLower().Contains("laver");
+                return workstationType.Equals("Wash", System.StringComparison.OrdinalIgnoreCase);
             default:
+                Debug.LogWarning($"Type d'action non reconnu: {actionType}");
                 return false;
         }
     }
@@ -204,30 +229,37 @@ public class WorkstationManager : MonoBehaviour
         }
     }
 
-    private ProcessType DetermineProcessType(string taskName)
+    private ProcessType DetermineProcessType(string workstation)
     {
-        if (taskName.Contains("couper") || taskName.Contains("Couper") || 
-            taskName.Contains("découper") || taskName.Contains("Découper"))
-            return ProcessType.Cut;
-        if (taskName.Contains("cuire") || taskName.Contains("Cuire") || 
-            taskName.Contains("préparer") || taskName.Contains("Préparer"))
-            return ProcessType.Cook;
-        if (taskName.Contains("laver") || taskName.Contains("Laver"))
-            return ProcessType.Wash;
-
-        return ProcessType.Cut;
+        switch (workstation.ToLower())
+        {
+            case "grill":
+                return ProcessType.Cook;
+            case "cutting_board":
+                return ProcessType.Cut;
+            case "sink":
+                return ProcessType.Wash;
+            default:
+                Debug.LogWarning($"Unknown workstation type: {workstation}");
+                return ProcessType.Cut;
+        }
     }
 
     private WorkStation FindAvailableWorkstation(ProcessType type)
     {
         Debug.Log($"Recherche d'une station de type {type}. Stations actuelles:");
-        foreach (var station in allWorkstations)
+    
+        // Filtrer d'abord les stations qui commencent par "table"
+        var validStations = allWorkstations.Where(ws => 
+            !ws.gameObject.name.ToLower().StartsWith("table")).ToList();
+
+        foreach (var station in validStations)
         {
             bool isOccupied = playerWorkstations.ContainsValue(station);
             Debug.Log($"- Station '{station.gameObject.name}' : Type={station.GetStationType()}, Occupée={isOccupied}");
         }
 
-        var availableStation = allWorkstations.Find(ws => 
+        var availableStation = validStations.Find(ws => 
             !playerWorkstations.ContainsValue(ws) && 
             ws.GetStationType() == type);
 
@@ -242,7 +274,6 @@ public class WorkstationManager : MonoBehaviour
 
         return availableStation;
     }
-
     private void AssignWorkstation(WorkStation station, string playerId, string color)
     {
         Debug.Log($"Tentative d'assignation de la station '{station.gameObject.name}' au joueur {playerId}");

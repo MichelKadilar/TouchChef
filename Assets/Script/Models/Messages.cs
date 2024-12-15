@@ -29,7 +29,9 @@ public class WebSocketProduct
 [Serializable]
 public class AssignedTaskData
 {
-    public string taskName;
+    public string taskId;
+    public string quantity;
+    public string workstation;
     public CookData cook;
 }
 
@@ -55,7 +57,7 @@ public class TaskProgressMessage
 public class TaskProgressData
 {
     public string playerId;
-    public string taskName;
+    public string taskId;
     public int currentProgress;
     public int targetProgress;
 }
