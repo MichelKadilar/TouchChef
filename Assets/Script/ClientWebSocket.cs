@@ -122,6 +122,19 @@ public class ClientWebSocket : MonoBehaviour
             Debug.LogError($"ClientWebSocket: Erreur de parsing: {e.Message}");
         }
     }
+    
+    public void SendMessage(string message)
+    {
+        if (_websocket != null && _websocket.State == WebSocketState.Open)
+        {
+            Debug.Log($"Envoi du message WebSocket : {message}");
+            _websocket.SendText(message);
+        }
+        else
+        {
+            Debug.LogError("Tentative d'envoi de message avec une connexion WebSocket fermée");
+        }
+    }
 
     private void HandleTaskMessage(WebSocketTaskMessage message)
     {

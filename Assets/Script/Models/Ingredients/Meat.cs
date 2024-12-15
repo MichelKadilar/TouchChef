@@ -74,6 +74,7 @@ public class Meat : BaseIngredient, ISliceable
                 allowedProcesses.Clear();
                 allowedProcesses.Add(ProcessType.Cook);
                 _slider.gameObject.SetActive(false);
+                NotifyActionProgress("cut");
             }
             UpdateVisual();
         }
@@ -96,6 +97,7 @@ public class Meat : BaseIngredient, ISliceable
                         currentState = IngredientState.Cooked;
                         allowedProcesses.Clear();
                         isProcessing = false;
+                        NotifyActionProgress("cook");
                     }
                     else if (cookingTimer >= burnTime && this.GetCurrentWorkStation().GetStationType() == ProcessType.Cook)
                     {

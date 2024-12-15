@@ -41,3 +41,30 @@ public class CookData
     public string avatar;
     public string color;
 }
+
+[Serializable]
+public class TaskProgressMessage
+{
+    public string type = "taskProgress";
+    public string from = "unity";
+    public string to = "angular";
+    public TaskProgressData progressData;
+}
+
+[Serializable]
+public class TaskProgressData
+{
+    public string playerId;
+    public string taskName;
+    public int currentProgress;
+    public int targetProgress;
+}
+
+[Serializable]
+public class TaskCompletionMessage
+{
+    public string type = "taskComplete";
+    public string from = "unity";
+    public string to = "angular";
+    public TaskProgressData progressData;
+}

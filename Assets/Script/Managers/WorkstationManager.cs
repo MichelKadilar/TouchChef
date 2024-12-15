@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 
-
 public class WorkstationManager : MonoBehaviour
 {
     private static WorkstationManager instance;
@@ -18,11 +17,10 @@ public class WorkstationManager : MonoBehaviour
         }
     }
 
-    // Dictionnaire pour suivre les attributions workstation par joueur
     private Dictionary<string, WorkStation> playerWorkstations = new Dictionary<string, WorkStation>();
-    
-    // Cache de toutes les workstations dans la scène
     private List<WorkStation> allWorkstations;
+    private Dictionary<string, TaskProgressData> activeTasks = new Dictionary<string, TaskProgressData>();
+    private Dictionary<WorkStation, string> workstationPlayers = new Dictionary<WorkStation, string>();
 
     void Awake()
     {
@@ -47,11 +45,10 @@ public class WorkstationManager : MonoBehaviour
         }
     }
 
-
     public void HandleActiveTask(WebSocketTaskMessage message)
     {
         Debug.Log("WorkstationManager: Traitement d'une nouvelle tâche active");
-        
+
         if (message.assignedTask == null || message.assignedTask.cook == null)
         {
             Debug.LogError("WorkstationManager: Message invalide reçu - assignedTask ou cook est null");
@@ -78,11 +75,101 @@ public class WorkstationManager : MonoBehaviour
         {
             Debug.Log($"WorkstationManager: Station disponible trouvée pour le type {requiredType}");
             AssignWorkstation(availableStation, playerId, message.assignedTask.cook.color);
+            workstationPlayers[availableStation] = playerId;
         }
         else
         {
             Debug.LogWarning($"WorkstationManager: Aucune station disponible pour le type {requiredType}");
         }
+
+        var progressData = new TaskProgressData
+        {
+            playerId = playerId,
+            taskName = message.assignedTask.taskName,
+            currentProgress = 0,
+            targetProgress = ExtractTargetValue(message.assignedTask.taskName)
+        };
+        activeTasks[playerId] = progressData;
+    }
+
+    private int ExtractTargetValue(string taskName)
+    {
+        try
+        {
+            string[] words = taskName.Split(' ');
+            foreach (string word in words)
+            {
+                if (int.TryParse(word, out int number))
+                {
+                    return number;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Erreur lors de l'extraction de la valeur cible : {e.Message}");
+        }
+        return 1;
+    }
+
+    public void UpdateTaskProgress(WorkStation workstation, string actionType)
+    {
+        if (!workstationPlayers.TryGetValue(workstation, out string playerId))
+        {
+            return;
+        }
+
+        if (!activeTasks.TryGetValue(playerId, out TaskProgressData taskData))
+        {
+            return;
+        }
+        
+        if (!IsActionValidForTask(actionType, taskData.taskName))
+        {
+            Debug.Log($"Action {actionType} ne correspond pas à la tâche {taskData.taskName}");
+            return;
+        }
+
+        taskData.currentProgress++;
+
+        var progressMessage = new TaskProgressMessage
+        {
+            progressData = taskData
+        };
+        ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(progressMessage));
+
+        if (taskData.currentProgress >= taskData.targetProgress)
+        {
+            var completionMessage = new TaskCompletionMessage
+            {
+                progressData = taskData
+            };
+            ClientWebSocket.Instance?.SendMessage(JsonUtility.ToJson(completionMessage));
+            activeTasks.Remove(playerId);
+        }
+    }
+    
+    private bool IsActionValidForTask(string actionType, string taskName)
+    {
+        switch (actionType.ToLower())
+        {
+            case "cut":
+                return taskName.ToLower().Contains("couper") || 
+                       taskName.ToLower().Contains("découper");
+            case "cook":
+                return taskName.ToLower().Contains("cuire") || 
+                       taskName.ToLower().Contains("préparer");
+            case "wash":
+                return taskName.ToLower().Contains("laver");
+            default:
+                return false;
+        }
+    }
+
+    public string GetPlayerIdForWorkstation(WorkStation workstation)
+    {
+        workstationPlayers.TryGetValue(workstation, out string playerId);
+        return playerId;
     }
 
     public void HandleUnactiveTask(string playerId)
@@ -115,7 +202,7 @@ public class WorkstationManager : MonoBehaviour
             return ProcessType.Cook;
         if (taskName.Contains("laver") || taskName.Contains("Laver"))
             return ProcessType.Wash;
-        
+
         return ProcessType.Cut;
     }
 
@@ -125,14 +212,12 @@ public class WorkstationManager : MonoBehaviour
         foreach (var station in allWorkstations)
         {
             bool isOccupied = playerWorkstations.ContainsValue(station);
-            bool isTableStation = station is TableStation;  // Nouvelle vérification
-            Debug.Log($"- Station '{station.gameObject.name}' : Type={station.GetStationType()}, Occupée={isOccupied}, EstTableStation={isTableStation}");
+            Debug.Log($"- Station '{station.gameObject.name}' : Type={station.GetStationType()}, Occupée={isOccupied}");
         }
 
         var availableStation = allWorkstations.Find(ws => 
             !playerWorkstations.ContainsValue(ws) && 
-            ws.GetStationType() == type &&
-            !(ws is TableStation));  // Ajout du filtre pour exclure les TableStation
+            ws.GetStationType() == type);
 
         if (availableStation != null)
         {
@@ -150,19 +235,15 @@ public class WorkstationManager : MonoBehaviour
     {
         Debug.Log($"Tentative d'assignation de la station '{station.gameObject.name}' au joueur {playerId}");
         playerWorkstations[playerId] = station;
-        
+
         var highlight = station.GetComponent<WorkStationHighlight>();
         if (highlight != null)
         {
             Debug.Log($"Configuration du highlight pour la station '{station.gameObject.name}'");
-            Color stationColor;
-            if (ColorUtility.TryParseHtmlString(color, out stationColor))
+            if (ColorUtility.TryParseHtmlString(color, out Color stationColor))
             {
-                Debug.Log($"Couleur parsée avec succès: {color} -> {stationColor}");
                 highlight.SetHighlight(true, stationColor);
-                
-                // Vérification après l'application
-                Debug.Log($"État du highlight après configuration: {highlight.IsHighlighted()}");
+                Debug.Log($"Couleur parsée avec succès: {color} -> {stationColor}");
             }
             else
             {
@@ -186,7 +267,7 @@ public class WorkstationManager : MonoBehaviour
                 highlight.SetHighlight(false);
                 Debug.Log($"Highlight désactivé pour la station '{station.gameObject.name}'");
             }
-            
+
             playerWorkstations.Remove(playerId);
         }
         else
