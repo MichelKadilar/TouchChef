@@ -6191,6 +6191,8 @@ MonoBehaviour:
     prefab: {fileID: 5963080568622580502, guid: dfecd5f0c55704baa945326b5587d4a9, type: 3}
   - id: 3
     prefab: {fileID: 7797463771621917780, guid: ec71fa45bf6ec4c25812730624d6dee6, type: 3}
+  - id: 5
+    prefab: {fileID: 8418327034278215596, guid: 671313d795e504cbeb660f44ba79108f, type: 3}
   conveyorBelts:
   - {fileID: 400751038}
   - {fileID: 2040961474}
@@ -6378,13 +6380,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564884443}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 1.43, z: -0.03}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0.049}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1442996753}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &1566654577 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c42c28083d8ba2c4985a4fc6a356789d, type: 3}
