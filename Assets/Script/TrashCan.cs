@@ -105,7 +105,7 @@ public class TrashCan : MonoBehaviour
 
     private IEnumerator CloseAfterThrow()
     {
-        yield return new WaitForSeconds(2f); // Attendre 1 seconde
+        yield return new WaitForSeconds(2f); // Attendre 2 seconde
         SetOpen(false); // Déclenche l'animation de fermeture
     }
 

@@ -18,7 +18,8 @@ public class PlateStack : MonoBehaviour
             Mathf.Abs(Camera.main.transform.position.z + 10)
         ));
 
-        worldPosition.z = -10f;
+        worldPosition.z = -2f;
+        
 
         GameObject plate = Instantiate(platePrefab, worldPosition, Quaternion.identity);
         var pickable = plate.GetComponent<IPickable>();
