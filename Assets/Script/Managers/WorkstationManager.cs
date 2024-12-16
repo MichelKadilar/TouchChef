@@ -235,9 +235,9 @@ public class WorkstationManager : MonoBehaviour
         {
             case "grill":
                 return ProcessType.Cook;
-            case "cutting_board":
+            case "planche":
                 return ProcessType.Cut;
-            case "sink":
+            case "evier":
                 return ProcessType.Wash;
             default:
                 Debug.LogWarning($"Unknown workstation type: {workstation}");
