@@ -75,17 +75,20 @@ namespace Script.Conveyor
             {
                 GameObject newProduct = Instantiate(prefab, conveyorPoints[0].position, Quaternion.identity);
                 Debug.Log($"ConveyorSystem: Produit créé à la position {conveyorPoints[0].position}");
-            
+    
                 var pickableObject = newProduct.GetComponent<PickableObject>();
                 if (pickableObject != null)
                 {
                     pickableObject.InitializeConveyor(this);
                     Debug.Log("ConveyorSystem: Composant PickableObject initialisé");
                 }
-            
+    
                 activeProducts.Add(newProduct);
                 productTargetPoints[newProduct] = 1;
                 pausedProducts[newProduct] = false;
+
+                // Play spawn sound effect
+                AudioManager.Instance.PlayItemSpawnSound();
             }
             else
             {
