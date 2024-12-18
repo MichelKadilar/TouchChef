@@ -20,6 +20,12 @@ public class MultiTouchDragDrop : MonoBehaviour
 
     private void Update()
     {
+        // Mettre à jour la référence de la caméra si nécessaire
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return;
+        }
         HandleTouchInput();
     }
 
@@ -66,6 +72,8 @@ public class MultiTouchDragDrop : MonoBehaviour
 
     private void HandleTouchStart(int touchId, Vector2 position)
     {
+        if (mainCamera == null) return;
+        
         // Cast a ray to check for interactable objects
         Ray ray = mainCamera.ScreenPointToRay(position);
         RaycastHit[] hits = Physics.RaycastAll(ray, 100f, interactableLayer);

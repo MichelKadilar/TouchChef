@@ -32,7 +32,7 @@ public class WorkstationManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            InitializeWorkstations();
+            DontDestroyOnLoad(gameObject);
             if (audioSource == null)
             {
                 audioSource = gameObject.AddComponent<AudioSource>();
@@ -41,6 +41,19 @@ public class WorkstationManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+    }
+
+    public void Initialize()
+    {
+        Debug.Log("WorkstationManager: Starting initialization...");
+        if (allWorkstations == null || allWorkstations.Count == 0)
+        {
+            InitializeWorkstations();
+        }
+        else
+        {
+            Debug.Log("WorkstationManager: Already initialized with " + allWorkstations.Count + " stations");
         }
     }
 

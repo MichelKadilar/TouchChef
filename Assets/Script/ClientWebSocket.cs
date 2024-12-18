@@ -3,6 +3,7 @@ using NativeWebSocket;
 using UnityEngine.SceneManagement;
 using Script.Conveyor;
 using System;
+using System.Collections;
 
 public class ClientWebSocket : MonoBehaviour
 {
@@ -35,7 +36,7 @@ public class ClientWebSocket : MonoBehaviour
         Debug.Log("ClientWebSocket: Démarrage...");
         InitializeManagers();
         
-        _websocket = new WebSocket("ws://websocket.chhilif.com/ws");
+        _websocket = new WebSocket("wss://websocket.chhilif.com/ws");
 
         _websocket.OnOpen += () =>
         {
@@ -66,11 +67,25 @@ public class ClientWebSocket : MonoBehaviour
 
     private void InitializeManagers()
     {
+        Debug.Log("ClientWebSocket: Initialisation des managers...");
         workstationManager = WorkstationManager.Instance;
         conveyorSystem = FindObjectOfType<ConveyorSystem>();
         
         if (workstationManager == null)
+        {
             Debug.LogWarning("ClientWebSocket: WorkstationManager non trouvé!");
+            GameObject controleur = GameObject.Find("Controleur");
+            if (controleur != null)
+            {
+                workstationManager = controleur.GetComponent<WorkstationManager>();
+                if (workstationManager != null)
+                {
+                    Debug.Log("WorkstationManager trouvé, initialisation...");
+                    DontDestroyOnLoad(controleur);
+                    workstationManager.Initialize();
+                }
+            }
+        }
         if (conveyorSystem == null)
             Debug.LogWarning("ClientWebSocket: ConveyorSystem non trouvé!");
 
@@ -97,7 +112,8 @@ public class ClientWebSocket : MonoBehaviour
         if (message.Contains("startGame"))
         {
             Debug.Log("ClientWebSocket: Commande de démarrage du jeu reçue");
-            SceneManager.LoadScene("Cuisine");
+            // Remplacer la ligne SceneManager.LoadScene("Cuisine") par :
+            StartCoroutine(LoadGameScene());
             return;
         }
 
@@ -126,6 +142,81 @@ public class ClientWebSocket : MonoBehaviour
         }
     }
     
+    private IEnumerator LoadGameScene()
+    {
+        // Désactiver tous les scripts qui utilisent la caméra
+        DisableAllCameraUsers();
+
+        // Charger la scène Cuisine
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Cuisine", LoadSceneMode.Single);
+        
+        while (!asyncLoad.isDone)
+        {
+            yield return null;
+        }
+
+        // Attendre deux frames pour s'assurer que tout est initialisé
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+
+        Debug.Log("Recherche du Controleur dans la scène...");
+        GameObject controleur = GameObject.Find("Controleur");
+        if (controleur == null)
+        {
+            Debug.LogError("Controleur non trouvé dans la scène!");
+            yield break;
+        }
+
+        WorkstationManager manager = controleur.GetComponent<WorkstationManager>();
+        if (manager == null)
+        {
+            Debug.LogError("WorkstationManager non trouvé sur le Controleur!");
+            yield break;
+        }
+
+        Debug.Log("WorkstationManager trouvé, initialisation...");
+        DontDestroyOnLoad(controleur);
+        manager.Initialize();
+
+        // Réinitialiser les références
+        InitializeManagers();
+
+        // Réactiver tous les scripts qui utilisent la caméra
+        EnableAllCameraUsers();
+    }
+
+    private void DisableAllCameraUsers()
+    {
+        var touchManagers = FindObjectsOfType<MultiTouchDragDrop>();
+        var sliceDetectors = FindObjectsOfType<SliceDetector>();
+        
+        foreach (var manager in touchManagers)
+        {
+            manager.enabled = false;
+        }
+        
+        foreach (var detector in sliceDetectors)
+        {
+            detector.enabled = false;
+        }
+    }
+
+    private void EnableAllCameraUsers()
+    {
+        var touchManagers = FindObjectsOfType<MultiTouchDragDrop>();
+        var sliceDetectors = FindObjectsOfType<SliceDetector>();
+        
+        foreach (var manager in touchManagers)
+        {
+            manager.enabled = true;
+        }
+        
+        foreach (var detector in sliceDetectors)
+        {
+            detector.enabled = true;
+        }
+    }
+    
     public void SendMessage(string message)
     {
         if (_websocket != null && _websocket.State == WebSocketState.Open)
@@ -141,6 +232,14 @@ public class ClientWebSocket : MonoBehaviour
 
     private void HandleTaskMessage(WebSocketTaskMessage message)
     {
+        // Attendre que le WorkstationManager soit disponible
+        WorkstationManager manager = FindObjectOfType<WorkstationManager>();
+        if (manager == null)
+        {
+            StartCoroutine(WaitForWorkstationManager(message));
+            return;
+        }
+        
         // Notifier les abonnés
         OnTaskMessageReceived?.Invoke(message);
 
@@ -161,6 +260,33 @@ public class ClientWebSocket : MonoBehaviour
                 Debug.Log($"ClientWebSocket: Traitement d'une désactivation de tâche");
                 workstationManager.HandleUnactiveTask(message.from);
                 break;
+        }
+    }
+
+    private IEnumerator WaitForWorkstationManager(WebSocketTaskMessage message)
+    {
+        WorkstationManager manager = null;
+        float timeout = 5f; // Timeout de 5 secondes
+        float elapsed = 0f;
+        
+        while (manager == null && elapsed < timeout)
+        {
+            manager = FindObjectOfType<WorkstationManager>();
+            if (manager == null)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+        }
+        
+        if (manager != null)
+        {
+            // Réessayer le traitement du message
+            HandleTaskMessage(message);
+        }
+        else
+        {
+            Debug.LogError("Impossible de trouver le WorkstationManager après le timeout");
         }
     }
 

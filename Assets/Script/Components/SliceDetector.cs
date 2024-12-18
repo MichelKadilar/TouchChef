@@ -27,6 +27,13 @@ public class SliceDetector : MonoBehaviour
 
     private void Update()
     {
+        // Mettre à jour la référence de la caméra si nécessaire
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return;
+        }
+
         // Handle mouse input for slicing
         if (Mouse.current != null)
         {
@@ -95,6 +102,8 @@ public class SliceDetector : MonoBehaviour
 
     private void HandleSliceAtPosition(Vector2 position)
     {
+        if (mainCamera == null) return;
+
         if (debugMode) Debug.Log($"Attempting slice at position: {position}");
 
         Ray ray = mainCamera.ScreenPointToRay(position);
