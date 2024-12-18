@@ -12,6 +12,7 @@ public class ClientWebSocket : MonoBehaviour
     // Event pour les systèmes qui ont besoin d'être notifiés des messages
     public event Action<WebSocketTaskMessage> OnTaskMessageReceived;
     public event Action<Product> OnProductMessageReceived;
+    private bool isGameStarted = false;
 
     private WebSocket _websocket;
     private WorkstationManager workstationManager;
@@ -111,8 +112,15 @@ public class ClientWebSocket : MonoBehaviour
         Debug.Log($"ClientWebSocket: Message reçu: {message}");
         if (message.Contains("startGame"))
         {
+            // Ignorer le message si le jeu est déjà démarré
+            if (isGameStarted)
+            {
+                Debug.Log("ClientWebSocket: Ignorer la commande de démarrage - jeu déjà en cours");
+                return;
+            }
+
             Debug.Log("ClientWebSocket: Commande de démarrage du jeu reçue");
-            // Remplacer la ligne SceneManager.LoadScene("Cuisine") par :
+            isGameStarted = true;
             StartCoroutine(LoadGameScene());
             return;
         }
