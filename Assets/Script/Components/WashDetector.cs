@@ -35,6 +35,12 @@ public class WashDetector : MonoBehaviour
 
     private void Update()
     {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return;
+        }
+
         HandleWashInput();
     }
 
@@ -42,7 +48,6 @@ public class WashDetector : MonoBehaviour
     {
         if (Touchscreen.current != null)
         {
-            // Gestion tactile
             foreach (var touch in Touchscreen.current.touches)
             {
                 int touchId = touch.touchId.ReadValue();
@@ -58,7 +63,6 @@ public class WashDetector : MonoBehaviour
         }
         else if (Mouse.current != null)
         {
-            // Gestion souris
             if (Mouse.current.middleButton.wasPressedThisFrame)
             {
                 Vector2 mousePosition = Mouse.current.position.ReadValue();
@@ -69,6 +73,8 @@ public class WashDetector : MonoBehaviour
 
     private void TryStartWash(Vector2 position)
     {
+        if (mainCamera == null) return;
+
         if (debugMode) Debug.Log("Tentative de lavage à la position: " + position);
         
         Ray ray = mainCamera.ScreenPointToRay(position);
@@ -92,17 +98,14 @@ public class WashDetector : MonoBehaviour
                 {
                     isWashing = true;
                     
-                    // Effectuer le lavage
                     washable.StartWash();
                     washable.DoWash();
                     
-                    // Jouer le son
                     if (audioSource != null && washSound != null)
                     {
                         audioSource.PlayOneShot(washSound, washVolume);
                     }
                     
-                    // Arrêter le lavage après un court délai
                     StartCoroutine(StopWashAfterDelay(washable, 0.1f));
                     
                     if (debugMode) Debug.Log($"Lavage effectué sur {ingredient.name}");

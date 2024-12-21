@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class WorkStation : MonoBehaviour
 {
     [Header("Configuration")]
-    [SerializeField] private ProcessType stationType;
+    [SerializeField] public ProcessType stationType;
     [SerializeField] public Transform ingredientPosition;
     [SerializeField] private float processRadius = 1f;
     [SerializeField] public WorkStationPosition workStationPosition;

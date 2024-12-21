@@ -69,12 +69,12 @@ public class Tomato : BaseIngredient, ISliceable
             {
                 Debug.Log("CURRENT STATE : CUT");
                 currentState = IngredientState.Cut;
+                allowedProcesses.Clear();
+                allowedProcesses.Add(ProcessType.Assemble);
                 _slider.gameObject.SetActive(false);
                 UpdateVisual();
                 NotifyActionProgress("cut");
             }
-            
-            
         }
     }
 
@@ -84,6 +84,8 @@ public class Tomato : BaseIngredient, ISliceable
         {
             case ProcessType.Cut:
                 currentState = IngredientState.Cut;
+                allowedProcesses.Clear();
+                allowedProcesses.Add(ProcessType.Assemble);
                 break;
         }
 

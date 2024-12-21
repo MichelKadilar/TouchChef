@@ -2,5 +2,6 @@
 {
     Wash,
     Cut,
-    Cook
+    Cook,
+    Assemble
 }

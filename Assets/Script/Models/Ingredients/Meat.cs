@@ -164,6 +164,7 @@ public class Meat : BaseIngredient, ISliceable
                 {
                     currentState = IngredientState.Cooked;
                     allowedProcesses.Clear();
+                    allowedProcesses.Add(ProcessType.Assemble);
                     isProcessing = false;
                     StartCoroutine(WaitForRemoval());
                 }

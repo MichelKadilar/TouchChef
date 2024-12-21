@@ -150,21 +150,18 @@ public class WorkstationManager : MonoBehaviour
 
     public void UpdateTaskProgress(WorkStation workstation, string actionType)
     {
-        // Vérifier si le workstation est associé à un joueur
         if (!workstationPlayers.TryGetValue(workstation, out string playerId))
         {
             Debug.LogWarning("Pas de joueur associé à cette workstation");
             return;
         }
 
-        // Vérifier si le joueur a une tâche active
         if (!activeTasks.TryGetValue(playerId, out TaskProgressData taskData))
         {
             Debug.LogWarning($"Pas de tâche active pour le joueur {playerId}");
             return;
         }
     
-        // Vérifier si l'action correspond à la workstation de la tâche
         if (!IsActionValidForTask(actionType, workstation.GetStationType().ToString()))
         {
             Debug.Log($"Action {actionType} ne correspond pas au type de workstation {workstation.GetStationType()}");
@@ -173,7 +170,6 @@ public class WorkstationManager : MonoBehaviour
 
         taskData.currentProgress++;
     
-        // Créer et envoyer le message de progression
         var progressMessage = new TaskProgressMessage
         {
             type = "taskProgress",
@@ -192,11 +188,11 @@ public class WorkstationManager : MonoBehaviour
         Debug.Log($"Envoi du message de progression: {jsonMessage}");
         ClientWebSocket.Instance?.SendMessage(jsonMessage);
 
-        // Vérifier si la tâche est terminée
         if (taskData.currentProgress >= taskData.targetProgress)
         {
             Debug.Log($"Tâche {taskData.taskId} terminée pour le joueur {playerId}");
             activeTasks.Remove(playerId);
+            ReleaseWorkstation(playerId);
         }
     }
     
@@ -262,7 +258,6 @@ public class WorkstationManager : MonoBehaviour
     {
         Debug.Log($"Recherche d'une station de type {type}. Stations actuelles:");
     
-        // Filtrer d'abord les stations qui commencent par "table"
         var validStations = allWorkstations.Where(ws => 
             !ws.gameObject.name.ToLower().StartsWith("table")).ToList();
 
@@ -287,6 +282,7 @@ public class WorkstationManager : MonoBehaviour
 
         return availableStation;
     }
+
     private void AssignWorkstation(WorkStation station, string playerId, string color)
     {
         Debug.Log($"Tentative d'assignation de la station '{station.gameObject.name}' au joueur {playerId}");
@@ -324,6 +320,7 @@ public class WorkstationManager : MonoBehaviour
                 Debug.Log($"Highlight désactivé pour la station '{station.gameObject.name}'");
             }
 
+            workstationPlayers.Remove(station);
             playerWorkstations.Remove(playerId);
         }
         else

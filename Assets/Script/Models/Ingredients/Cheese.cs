@@ -85,6 +85,8 @@ public class Cheese : BaseIngredient, ISliceable
         {
             case ProcessType.Cut:
                 currentState = IngredientState.Cut;
+                allowedProcesses.Clear();
+                allowedProcesses.Add(ProcessType.Assemble);
                 break;
         }
 

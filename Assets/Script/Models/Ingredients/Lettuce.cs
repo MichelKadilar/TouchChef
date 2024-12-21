@@ -72,6 +72,8 @@ public class Lettuce : BaseIngredient, ISliceable, IWashable
                 currentState = IngredientState.Cut;
                 _washSlider.gameObject.SetActive(false);
                 NotifyActionProgress("cut");
+                allowedProcesses.Clear();
+                allowedProcesses.Add(ProcessType.Assemble);
             }
             UpdateVisual();
         }
