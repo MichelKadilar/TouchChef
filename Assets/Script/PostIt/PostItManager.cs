@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting.FullSerializer;
 using uPIe;
 using UnityEngine.UI;
 
@@ -118,19 +119,19 @@ public class PostItManager : MonoBehaviour
         {
             case 0:
                 colorPlayer1.color = color;
-                avatarPlayer1.sprite = avatars[int.Parse(players[player].avatar)];
+                avatarPlayer1.sprite = avatars[int.Parse(players[player].avatar)-1];
                 break;
             case 1:
                 colorPlayer2.color = color;
-                avatarPlayer2.sprite = avatars[int.Parse(players[player].avatar)];
+                avatarPlayer2.sprite = avatars[int.Parse(players[player].avatar)-1];
                 break;
             case 2:
                 colorPlayer3.color = color;
-                avatarPlayer3.sprite = avatars[int.Parse(players[player].avatar)];
+                avatarPlayer3.sprite = avatars[int.Parse(players[player].avatar)-1];
                 break;
             case 3:
                 colorPlayer4.color = color;
-                avatarPlayer4.sprite = avatars[int.Parse(players[player].avatar)];
+                avatarPlayer4.sprite = avatars[int.Parse(players[player].avatar)-1];
                 break;
         }
     }
@@ -202,7 +203,7 @@ public class PostItManager : MonoBehaviour
         if (selectedPieceId >= players.Length || selectedPieceId < 0) return;
     
         // Créer l'objet message
-        var message = new
+        var message = new AssignTaskMessage
         {
             type = "assign_task",
             taskId = currentTaskId,
@@ -210,11 +211,13 @@ public class PostItManager : MonoBehaviour
             from = "table",
             to = "angular"
         };
+        Debug.Log("Message brut:"+message);
 
         // Convertir en JSON et envoyer
         string jsonMessage = JsonUtility.ToJson(message);
         if (ClientWebSocket.Instance != null)
         {
+            Debug.Log("Message envoyé string :"+jsonMessage);
             ClientWebSocket.Instance.SendMessage(jsonMessage);
             
             // Détruire le post-it
@@ -249,4 +252,14 @@ public class PostItManager : MonoBehaviour
             ClientWebSocket.Instance.OnTaskTableMessageReceived -= HandleTaskMessage;
         }
     }
+}
+
+[System.Serializable]
+public class AssignTaskMessage
+{
+    public string type;
+    public string taskId;
+    public string playerId;
+    public string from;
+    public string to;
 }
