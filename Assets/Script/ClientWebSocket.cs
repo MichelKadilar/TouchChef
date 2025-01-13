@@ -11,10 +11,7 @@ public class ClientWebSocket : MonoBehaviour
 
     // Event pour les systèmes qui ont besoin d'être notifiés des messages
     public event Action<WebSocketTaskMessage> OnTaskMessageReceived;
-    public event Action<WebSocketTaskTableMessage> OnTaskTableMessageReceived;
     public event Action<Product> OnProductMessageReceived;
-    public Player[] players;
-    public event Action<Player[]> OnPlayersUpdated;
     private bool isGameStarted = false;
 
     private WebSocket _websocket;
@@ -108,8 +105,10 @@ public class ClientWebSocket : MonoBehaviour
     private void HandleWebSocketMessage(byte[] bytes)
     {
         string message = System.Text.Encoding.UTF8.GetString(bytes);
-        if (message.Contains("heartrate")) return;
-        
+        if (message.Contains("heartrate"))
+        {
+            return;
+        }
         Debug.Log($"ClientWebSocket: Message reçu: {message}");
         if (message.Contains("startGame"))
         {
@@ -126,18 +125,6 @@ public class ClientWebSocket : MonoBehaviour
             return;
         }
 
-        if (message.Contains("cooksList"))
-        {
-            Debug.Log("ClientWebSocket: Liste de cuisiniers reçue");
-            var cooksList = JsonUtility.FromJson<WebSocketCooksListMessage>(message);
-            if (cooksList.cooksList != null)
-            {
-                players = cooksList.cooksList;
-                OnPlayersUpdated?.Invoke(players);
-            }
-            return;
-        }
-
         try 
         {
             // D'abord essayer comme message de produit
@@ -146,15 +133,6 @@ public class ClientWebSocket : MonoBehaviour
             {
                 Debug.Log("ClientWebSocket: Message de produit détecté");
                 HandleProductMessage(productMessage);
-                return;
-            }
-            
-            // Essayer comme message de tâche de table
-            WebSocketTaskTableMessage tableMessage = JsonUtility.FromJson<WebSocketTaskTableMessage>(message);
-            if (tableMessage.type == "table_task")
-            {
-                Debug.Log($"ClientWebSocket: Message post-it détecté");
-                OnTaskTableMessageReceived?.Invoke(tableMessage);
                 return;
             }
         
