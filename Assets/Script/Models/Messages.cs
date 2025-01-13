@@ -10,6 +10,17 @@ public class WebSocketTaskMessage
 }
 
 [Serializable]
+public class WebSocketTaskTableMessage
+{
+    public string type;
+    public string task;
+    public string taskId;
+    public string taskIcons;
+    public string from;
+    public string to;
+}
+
+[Serializable]
 public class WebSocketMessage
 {
     public string type;
@@ -78,4 +89,22 @@ public class DeliveryScoreMessage
     public string from = "table";
     public string to = "angular";
     public string ingredientState;
+}
+
+[Serializable]
+public class WebSocketCooksListMessage
+{
+    public string type = "cooksList";
+    public string from = "angular";
+    public string to = "all";
+    public Player[] cooksList;
+}
+
+[Serializable]
+public class Player
+{
+    public string deviceId;
+    public string avatar;
+    public string color;
+    public string name;
 }
