@@ -26,10 +26,9 @@ public class BurgerAssemblyStation : WorkStation
             var bottomBun = ingredient as Bread;
             if (bottomBun != null && bottomBun.GetBreadType() == BreadType.Bottom)
             {
+                // Ne pas définir la rotation ici, laisser BurgerStack s'en charger
                 burgerStack.InitializeWithBottomBun(bottomBun);
                 isReadyForIngredients = true;
-                obj.transform.position = ingredientPosition.position;
-                obj.transform.rotation = ingredientPosition.rotation;
                 isOccupied = true;
                 currentObject = obj;
                 return true;

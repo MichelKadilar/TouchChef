@@ -204,3 +204,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allowedProcesses: 
   processingTime: 3
+  breadType: 0
