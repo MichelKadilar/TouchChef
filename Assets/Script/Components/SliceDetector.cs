@@ -104,14 +104,14 @@ public class SliceDetector : MonoBehaviour
     {
         if (mainCamera == null) return;
 
-        if (debugMode) Debug.Log($"Attempting slice at position: {position}");
-
         Ray ray = mainCamera.ScreenPointToRay(position);
-        RaycastHit hit;
+        RaycastHit[] hits = Physics.SphereCastAll(ray, 1.5f, raycastDistance, ingredientLayer);
 
-        if (Physics.Raycast(ray, out hit, raycastDistance, ingredientLayer))
+        if (hits.Length > 0)
         {
-            GameObject clickedObject = hit.collider.gameObject;
+            System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        
+            GameObject clickedObject = hits[0].collider.gameObject;
             BaseIngredient ingredient = clickedObject.GetComponent<BaseIngredient>();
 
             if (ingredient != null && 
@@ -120,10 +120,6 @@ public class SliceDetector : MonoBehaviour
             {
                 if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
                 sliceableIngredient.Slice();
-            }
-            else
-            {
-                if (debugMode) Debug.Log($"Object not sliceable or not on cutting station: {clickedObject.name}");
             }
         }
     }

@@ -4,10 +4,10 @@ using uPIe;
 public class PostItInteraction : MonoBehaviour
 {
     private uPIeMenu2 playersMenu;
-    private Canvas canvas;
     private bool isHolding;
     private float holdTimer;
     private readonly float holdDuration = 1f; // Durée de maintien nécessaire
+    private string taskId;
 
     void Start()
     {
@@ -16,7 +16,6 @@ public class PostItInteraction : MonoBehaviour
         if (playersMenu != null)
         {
             playersMenu.gameObject.SetActive(false); // Cacher le menu au départ
-            canvas = playersMenu.GetComponentInParent<Canvas>();
         }
     }
 
@@ -24,6 +23,11 @@ public class PostItInteraction : MonoBehaviour
     {
         isHolding = true;
         holdTimer = 0f;
+    }
+    
+    public void SetTaskId(string id)
+    {
+        taskId = id;
     }
 
     void OnMouseUp()
@@ -36,15 +40,15 @@ public class PostItInteraction : MonoBehaviour
             Vector2 mousePosition = Input.mousePosition;
             Vector2 menuPosition = playersMenu.transform.position;
             float distance = Vector2.Distance(mousePosition, menuPosition);
-            float threshold = 130f; // Ajustez cette valeur selon vos besoins
-            float minDistance = 20f; // Distance minimale pour éviter les clics accidentels
+            float threshold = 140f; // Distance seuil pour valider le clic
+            float minDistance = 20f; // Distance minimale pour éviter les clics accidentels et aussi pouvoir relacher au milieu
 
-         if (distance < threshold && distance > minDistance && selectedPieceId != -1)
+            if (distance < threshold && distance > minDistance && selectedPieceId != -1)
             {
                 var postItManager = FindObjectOfType<PostItManager>();
-                postItManager.PlayerSelectedFromRadialMenu(selectedPieceId);
+                postItManager.PlayerSelectedFromRadialMenu(selectedPieceId, taskId);
             }
-        
+            
             // Reset la sélection et cache le menu
             playersMenu.SelectedPieceId = -1;
             playersMenu.CurrentlyActiveOption = null;
@@ -56,6 +60,7 @@ public class PostItInteraction : MonoBehaviour
     {
         if (isHolding)
         {
+            //Debug.Log("Holding for " + holdTimer + " seconds...");
             holdTimer += Time.deltaTime;
             if (holdTimer >= holdDuration && playersMenu != null)
             {

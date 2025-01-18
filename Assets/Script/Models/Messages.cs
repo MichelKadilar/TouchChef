@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 [Serializable]
 public class WebSocketTaskMessage
@@ -7,6 +8,17 @@ public class WebSocketTaskMessage
     public string from;
     public string to;
     public AssignedTaskData assignedTask;
+}
+
+[Serializable]
+public class WebSocketTaskTableMessage
+{
+    public string type;
+    public string task;
+    public string taskId;
+    public string taskIcons;
+    public string from;
+    public string to;
 }
 
 [Serializable]
@@ -78,6 +90,45 @@ public class DeliveryScoreMessage
     public string from = "table";
     public string to = "angular";
     public string ingredientState;
+}
+
+[Serializable]
+public class WebSocketCooksListMessage
+{
+    public string type = "cooksList";
+    public string from = "angular";
+    public string to = "all";
+    public Player[] cooksList;
+}
+
+[Serializable]
+public class WebSocketTasksListMessage
+{
+    public string type = "tasksList";
+    public string from = "angular";
+    public string to = "table"; 
+    public Task[] tasks;
+}
+
+[Serializable]
+public class Player
+{
+    public string deviceId;
+    public string avatar;
+    public string color;
+    public string name;
+}
+
+[System.Serializable]
+public class Task
+{
+    public string id;
+    public string name;
+    public string workStation;
+    public int nbCooksNeeded;
+    public string icons;
+    public int quantity;
+    public bool isCompleted;
 }
 
 [Serializable]

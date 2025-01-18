@@ -4,13 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using uPIe;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
+
+public class TaskItem
+{
+    public string id;
+    public string icons;
+}
 
 public class PostItManager : MonoBehaviour
 {
     [Header("Configuration")]
     public GameObject postItPrefab;
     public Transform[] spawnPoints;
-    public Player[] players;
     public uPIeMenu2 playersMenu;
     public float outlineTicketWidth = 4f;
     
@@ -33,18 +39,21 @@ public class PostItManager : MonoBehaviour
     
     public Sprite[] avatars;
     public const int MAX_PLAYERS = 4;
-    
 
-    private Dictionary<string, GameObject> activePostIts = new Dictionary<string, GameObject>();
-    private HashSet<Transform> occupiedSpawnPoints = new HashSet<Transform>(); // Pour suivre les points occupés
-    private string currentTaskId;
+    [Header("State")]
+    public Player[] players;
+
+    public Dictionary<string, GameObject> activePostIts = new Dictionary<string, GameObject>(); // Pour suivre les post-its actifs
     
+    private HashSet<Transform> occupiedSpawnPoints = new HashSet<Transform>(); // Pour suivre les points occupés
+
     
     void Start()
     {
         if (ClientWebSocket.Instance != null)
         {
             ClientWebSocket.Instance.OnTaskTableMessageReceived += HandleTaskMessage;
+            ClientWebSocket.Instance.OnTasksLiskUpdated += HandleTasksListMessage;
         }
         else
         {
@@ -61,24 +70,35 @@ public class PostItManager : MonoBehaviour
     {
         if (message.type == "table_task")
         {
-            CreatePostIt(message);
+            CreatePostIt(message.taskId, message.taskIcons);
         }
     }
+    
+    private void HandleTasksListMessage(WebSocketTasksListMessage message)
+    {
+        if (message.type == "tasksList")
+        {
+            foreach (var task in message.tasks)
+            {
+                Debug.Log("PostItManager: Creaton of task: " + task.id + " with icons: " + task.icons);
+                CreatePostIt(task.id, task.icons);
+            }
+        }
+        Debug.Log("PostItManager: ALl tasks are created !");
+    }
 
-    private void CreatePostIt(WebSocketTaskTableMessage task)
+    private void CreatePostIt(string taskId, string taskIcons)
     {
         // Si un post-it avec cet ID existe déjà, on ne fait rien
-        if (activePostIts.ContainsKey(task.taskId)) return;
+        if (activePostIts.ContainsKey(taskId)) return;
 
         // Choisir un point de spawn aléatoire
         Vector3 spawnPosition = GetRandomSpawnPoint();
 
         // Créer le post-it
-        GameObject postIt = Instantiate(postItPrefab, spawnPosition, Quaternion.identity);
-        postIt.AddComponent<PostItInteraction>();
-        
-        // Stocker l'ID de la tâche actuelle
-        currentTaskId = task.taskId;
+        GameObject postIt = Instantiate(postItPrefab, spawnPosition, Quaternion.identity, transform);
+        var postItInteraction = postIt.AddComponent<PostItInteraction>();
+        postItInteraction.SetTaskId(taskId);
         
         // Get player list
         players = ClientWebSocket.Instance.players; // Pour l'état initial
@@ -104,11 +124,11 @@ public class PostItManager : MonoBehaviour
             return;
         }
         if (iconsText != null) {
-            iconsText.text = ConvertEmojiToSprite(task.taskIcons);
+            iconsText.text = ConvertEmojiToSprite(taskIcons);
         }
         
         // Ajouter le post-it à notre dictionnaire
-        activePostIts.Add(task.taskId, postIt);
+        activePostIts.Add(taskId, postIt);
     }
     
     private void EnablePLayer(int player)
@@ -200,15 +220,16 @@ public class PostItManager : MonoBehaviour
         return selectedPoint.position;
     }
     
-    public void PlayerSelectedFromRadialMenu(int selectedPieceId)
+    public void PlayerSelectedFromRadialMenu(int selectedPieceId, string taskId)
     {
+        Debug.Log("PostItManager: Player " + selectedPieceId + " selected from radial menu.");
         if (selectedPieceId >= players.Length || selectedPieceId < 0) return;
     
         // Créer l'objet message
         var message = new AssignTaskMessage
         {
             type = "assign_task",
-            taskId = currentTaskId,
+            taskId = taskId,
             playerId = players[selectedPieceId].deviceId,
             from = "table",
             to = "angular"
@@ -220,10 +241,11 @@ public class PostItManager : MonoBehaviour
         {
             ClientWebSocket.Instance.SendMessage(jsonMessage);
 
-            // Détruire le post-it
-            if (activePostIts.ContainsKey(currentTaskId))
+            Debug.Log("PostItManager: Player " + selectedPieceId + " selected for task: " + taskId);
+            if (activePostIts.ContainsKey(taskId))
             {
-                GameObject postIt = activePostIts[currentTaskId];
+                GameObject postIt = activePostIts[taskId];
+                Debug.Log("activePostIts string" + JsonUtility.ToJson(activePostIts));
                 
                 // Obtenir ou ajouter le composant Outline
                 Outline outline = postIt.GetComponent<Outline>();
@@ -231,6 +253,8 @@ public class PostItManager : MonoBehaviour
                 {
                     outline = postIt.AddComponent<Outline>();
                 }
+
+                Debug.Log("PostItMananger: Outline Player color: " + players[selectedPieceId].color);
 
                 // Convertir la couleur du joueur de format hexadécimal en Color
                 if (ColorUtility.TryParseHtmlString(players[selectedPieceId].color, out Color playerColor))
@@ -240,6 +264,7 @@ public class PostItManager : MonoBehaviour
                     outline.OutlineColor = playerColor;
                     outline.OutlineWidth = outlineTicketWidth; 
                     outline.enabled = true;
+                    Debug.Log("PostItManager: Outline enabled for player " + selectedPieceId);
                 }
             }
         }
@@ -256,6 +281,8 @@ public class PostItManager : MonoBehaviour
             ClientWebSocket.Instance.OnTaskTableMessageReceived -= HandleTaskMessage;
         }
     }
+    
+    
 }
 
 [System.Serializable]
