@@ -291,6 +291,30 @@ public class PostItManager : MonoBehaviour
             }
         }
     }
+    
+    public void removeOutline(string taskId)
+    {
+        if (activePostIts.ContainsKey(taskId))
+        {
+            GameObject postIt = activePostIts[taskId];
+            Outline outline = postIt.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.enabled = false;
+            }
+        }
+    }
+    
+    public void removePostIt(string taskId)
+    {
+        if (activePostIts.ContainsKey(taskId))
+        {
+            GameObject postIt = activePostIts[taskId];
+            activePostIts.Remove(taskId);
+            occupiedSpawnPoints.Remove(postIt.transform);
+            Destroy(postIt);
+        }
+    }
 
     private async void OnDestroy()
     {

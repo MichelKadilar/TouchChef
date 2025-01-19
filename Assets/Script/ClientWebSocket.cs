@@ -315,9 +315,9 @@ public class ClientWebSocket : MonoBehaviour
 
     private void HandleTaskMessage(WebSocketTaskMessage message)
     {
-        // Vérifier si le post-it existe dans le board
+        // Si c'est un addTask alors l'ajouter au PostItManager
         PostItManager postItManagerI = PostItManager.Instance;
-        if (postItManagerI != null)
+        if (postItManagerI != null && message.type == "addTask")
         {
             // Si le post-it n'existe pas, le créer
             if (!postItManagerI.activePostIts.ContainsKey(message.assignedTask.taskId))
@@ -354,6 +354,16 @@ public class ClientWebSocket : MonoBehaviour
             case "unactiveTask":
                 Debug.Log($"ClientWebSocket: Traitement d'une désactivation de tâche");
                 workstationManager.HandleUnactiveTask(message.from);
+                if (postItManager != null)
+                    postItManager.removeOutline(message.assignedTask.taskId);
+                    postItManager.removePostIt(message.assignedTask.taskId);
+                break;
+            
+            case "taskFinished":
+                Debug.Log($"ClientWebSocket: Traitement d'une tâche terminée");
+                workstationManager.HandleUnactiveTask(message.from);
+                if (postItManager != null)
+                    postItManager.removeOutline(message.assignedTask.taskId);
                 break;
         }
     }
