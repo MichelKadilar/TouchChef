@@ -3,22 +3,12 @@ using uPIe;
 
 public class PostItInteraction : MonoBehaviour
 {
-    private uPIeMenu2 playersMenu;
     private bool isHolding;
     private float holdTimer;
     private readonly float holdDuration = 1f; // Durée de maintien nécessaire
     private string taskId;
 
-    void Start()
-    {
-        // Récupérer la référence du menu depuis le PostItManager
-        playersMenu = FindObjectOfType<PostItManager>().playersMenu;
-        if (playersMenu != null)
-        {
-            playersMenu.gameObject.SetActive(false); // Cacher le menu au départ
-        }
-    }
-
+    
     void OnMouseDown()
     {
         isHolding = true;
@@ -32,8 +22,10 @@ public class PostItInteraction : MonoBehaviour
 
     void OnMouseUp()
     {
+        uPIeMenu2 playersMenu = PostItManager.Instance.playersMenu;
         int selectedPieceId = playersMenu.SelectedPieceId;
         isHolding = false;
+        
         if (playersMenu != null && playersMenu.gameObject.activeSelf)
         {
             // Vérifier si on est sur un bouton
@@ -60,8 +52,8 @@ public class PostItInteraction : MonoBehaviour
     {
         if (isHolding)
         {
-            //Debug.Log("Holding for " + holdTimer + " seconds...");
             holdTimer += Time.deltaTime;
+            uPIeMenu2 playersMenu = PostItManager.Instance.playersMenu;
             if (holdTimer >= holdDuration && playersMenu != null)
             {
                 // Redimensionner tous les boutons du menu radial

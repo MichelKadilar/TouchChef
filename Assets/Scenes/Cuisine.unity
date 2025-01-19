@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &39774821
 RectTransform:
   m_ObjectHideFlags: 0
@@ -161,7 +161,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 757, y: 0}
   m_SizeDelta: {x: 222, y: 188}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &39774822
@@ -867,16 +867,12 @@ MonoBehaviour:
   playersMenu: {fileID: 39774824}
   outlineTicketWidth: 15
   colorPlayer1: {fileID: 1027837933}
-  buttonPlayer1: {fileID: 980154396}
   avatarPlayer1: {fileID: 1310229109}
   colorPlayer2: {fileID: 45904507}
-  buttonPlayer2: {fileID: 429334725}
   avatarPlayer2: {fileID: 1582090298}
   colorPlayer3: {fileID: 1110284799}
-  buttonPlayer3: {fileID: 2086735056}
   avatarPlayer3: {fileID: 1309878652}
   colorPlayer4: {fileID: 150881052}
-  buttonPlayer4: {fileID: 2003181391}
   avatarPlayer4: {fileID: 1936338111}
   avatars:
   - {fileID: 21300000, guid: b3979b9cb10df49f9ad44d4ee6b78f2f, type: 3}
@@ -888,7 +884,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 9e044d38acb1449d28e2e5430ac5d62f, type: 3}
   - {fileID: 21300000, guid: 30fea6e5c66664513b83823dead170e6, type: 3}
   - {fileID: 21300000, guid: e1a3bd63e053d48198e9cf4c950958b7, type: 3}
-  players: []
 --- !u!4 &282366615
 Transform:
   m_ObjectHideFlags: 0
@@ -1141,6 +1136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   players: []
+  tasks: []
 --- !u!114 &351406362
 MonoBehaviour:
   m_ObjectHideFlags: 0

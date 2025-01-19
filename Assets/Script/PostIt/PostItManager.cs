@@ -36,6 +36,19 @@ public class PostItManager : MonoBehaviour
     
     private HashSet<Transform> occupiedSpawnPoints = new HashSet<Transform>(); // Pour suivre les points occupés
 
+    public static PostItManager Instance { get; private set; }
+    
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     
     void Start()
     {
@@ -52,6 +65,11 @@ public class PostItManager : MonoBehaviour
         else
         {
             Debug.LogError("ClientWebSocket instance not found!");
+        }
+        
+        if (playersMenu != null)
+        {
+            playersMenu.gameObject.SetActive(false); // Cacher le menu au départ
         }
     }
     private void HandleTaskMessage(WebSocketTaskTableMessage message)
@@ -92,7 +110,7 @@ public class PostItManager : MonoBehaviour
         postItInteraction.SetTaskId(taskId);
         
         ClientWebSocket.Instance.OnTaskTableMessageReceived += HandleTaskMessage;
-
+        
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
             if (i >= ClientWebSocket.Instance.players.Length)
@@ -164,7 +182,7 @@ public class PostItManager : MonoBehaviour
         }
     }
     
-    private string ConvertEmojiToSprite(string input)
+    private static string ConvertEmojiToSprite(string input)
     {
         Dictionary<string, int> emojiToSpriteIndex = new Dictionary<string, int>
         {
