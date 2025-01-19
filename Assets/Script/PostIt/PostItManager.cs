@@ -6,12 +6,6 @@ using uPIe;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public class TaskItem
-{
-    public string id;
-    public string icons;
-}
-
 public class PostItManager : MonoBehaviour
 {
     [Header("Configuration")]
@@ -22,26 +16,21 @@ public class PostItManager : MonoBehaviour
     
     [Header("UI Player 1")]
     public Image colorPlayer1;
-    public Button buttonPlayer1;
     public Image avatarPlayer1;
     [Header("UI Player 2")]
     public Image colorPlayer2;
-    public Button buttonPlayer2;
     public Image avatarPlayer2;
     [Header("UI Player 3")]
     public Image colorPlayer3;
-    public Button buttonPlayer3;
     public Image avatarPlayer3;
     [Header("UI Player 4")]
     public Image colorPlayer4;
-    public Button buttonPlayer4;
     public Image avatarPlayer4;
     
     public Sprite[] avatars;
     public const int MAX_PLAYERS = 4;
 
     [Header("State")]
-    public Player[] players;
 
     public Dictionary<string, GameObject> activePostIts = new Dictionary<string, GameObject>(); // Pour suivre les post-its actifs
     
@@ -54,18 +43,17 @@ public class PostItManager : MonoBehaviour
         {
             ClientWebSocket.Instance.OnTaskTableMessageReceived += HandleTaskMessage;
             ClientWebSocket.Instance.OnTasksLiskUpdated += HandleTasksListMessage;
+            
+            if (ClientWebSocket.Instance.tasks != null)
+            {
+                createPostItFromList(ClientWebSocket.Instance.tasks);
+            }
         }
         else
         {
             Debug.LogError("ClientWebSocket instance not found!");
         }
     }
-    
-    private void UpdatePlayers(Player[] newPlayers)
-    {
-        players = newPlayers;
-    }
-
     private void HandleTaskMessage(WebSocketTaskTableMessage message)
     {
         if (message.type == "table_task")
@@ -78,13 +66,16 @@ public class PostItManager : MonoBehaviour
     {
         if (message.type == "tasksList")
         {
-            foreach (var task in message.tasks)
-            {
-                Debug.Log("PostItManager: Creaton of task: " + task.id + " with icons: " + task.icons);
-                CreatePostIt(task.id, task.icons);
-            }
+            createPostItFromList(message.tasks);
         }
-        Debug.Log("PostItManager: ALl tasks are created !");
+    }
+    
+    private void createPostItFromList(Task[] tasks)
+    {
+        foreach (var task in tasks)
+        {
+            CreatePostIt(task.id, task.icons);
+        }
     }
 
     private void CreatePostIt(string taskId, string taskIcons)
@@ -100,14 +91,11 @@ public class PostItManager : MonoBehaviour
         var postItInteraction = postIt.AddComponent<PostItInteraction>();
         postItInteraction.SetTaskId(taskId);
         
-        // Get player list
-        players = ClientWebSocket.Instance.players; // Pour l'état initial
-        ClientWebSocket.Instance.OnPlayersUpdated += UpdatePlayers;
         ClientWebSocket.Instance.OnTaskTableMessageReceived += HandleTaskMessage;
 
         for (int i = 0; i < MAX_PLAYERS; i++)
         {
-            if (i >= players.Length)
+            if (i >= ClientWebSocket.Instance.players.Length)
             {
                 DisablePlayer(i);
                 continue;
@@ -129,10 +117,12 @@ public class PostItManager : MonoBehaviour
         
         // Ajouter le post-it à notre dictionnaire
         activePostIts.Add(taskId, postIt);
+        Debug.Log("PostItManager: PostIt created with ID: " + taskId + " at position: " + spawnPosition + " created successfully.");
     }
     
     private void EnablePLayer(int player)
     {
+        Player[] players = ClientWebSocket.Instance.players;
         ColorUtility.TryParseHtmlString(players[player].color, out Color color);
         switch (player)
         {
@@ -222,6 +212,7 @@ public class PostItManager : MonoBehaviour
     
     public void PlayerSelectedFromRadialMenu(int selectedPieceId, string taskId)
     {
+        Player[] players = ClientWebSocket.Instance.players;
         Debug.Log("PostItManager: Player " + selectedPieceId + " selected from radial menu.");
         if (selectedPieceId >= players.Length || selectedPieceId < 0) return;
     

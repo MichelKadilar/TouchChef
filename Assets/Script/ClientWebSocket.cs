@@ -14,6 +14,7 @@ public class ClientWebSocket : MonoBehaviour
     public event Action<WebSocketTaskTableMessage> OnTaskTableMessageReceived;
     public event Action<Product> OnProductMessageReceived;
     public Player[] players;
+    public Task[] tasks;
     public event Action<Player[]> OnPlayersUpdated;
     public event Action<WebSocketTasksListMessage> OnTasksLiskUpdated;
     private bool isGameStarted = false;
@@ -156,6 +157,7 @@ public class ClientWebSocket : MonoBehaviour
             if (tasksList.tasks != null)
             {
                 Debug.Log("ClientWebSocket: Liste de tâches reçue - Nombre: " + tasksList.tasks.Length);
+                tasks = tasksList.tasks;
                 OnTasksLiskUpdated?.Invoke(tasksList);
             }
             return;
