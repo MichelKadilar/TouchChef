@@ -96,7 +96,7 @@ public class PostItManager : MonoBehaviour
         }
     }
 
-    private void CreatePostIt(string taskId, string taskIcons)
+    public void CreatePostIt(string taskId, string taskIcons)
     {
         // Si un post-it avec cet ID existe déjà, on ne fait rien
         if (activePostIts.ContainsKey(taskId)) return;
@@ -140,7 +140,7 @@ public class PostItManager : MonoBehaviour
     
     private void EnablePLayer(int player)
     {
-        Player[] players = ClientWebSocket.Instance.players;
+        CookData[] players = ClientWebSocket.Instance.players;
         ColorUtility.TryParseHtmlString(players[player].color, out Color color);
         switch (player)
         {
@@ -230,8 +230,8 @@ public class PostItManager : MonoBehaviour
     
     public void PlayerSelectedFromRadialMenu(int selectedPieceId, string taskId)
     {
-        Player[] players = ClientWebSocket.Instance.players;
-        Debug.Log("PostItManager: Player " + selectedPieceId + " selected from radial menu.");
+        CookData[] players = ClientWebSocket.Instance.players;
+        Debug.Log("PostItManager: Player " + selectedPieceId + " selected from radial menu on " + players.Length + " players.");
         if (selectedPieceId >= players.Length || selectedPieceId < 0) return;
     
         // Créer l'objet message
@@ -253,33 +253,42 @@ public class PostItManager : MonoBehaviour
             Debug.Log("PostItManager: Player " + selectedPieceId + " selected for task: " + taskId);
             if (activePostIts.ContainsKey(taskId))
             {
-                GameObject postIt = activePostIts[taskId];
-                Debug.Log("activePostIts string" + JsonUtility.ToJson(activePostIts));
-                
                 // Obtenir ou ajouter le composant Outline
-                Outline outline = postIt.GetComponent<Outline>();
-                if (outline == null)
-                {
-                    outline = postIt.AddComponent<Outline>();
-                }
-
-                Debug.Log("PostItMananger: Outline Player color: " + players[selectedPieceId].color);
-
-                // Convertir la couleur du joueur de format hexadécimal en Color
-                if (ColorUtility.TryParseHtmlString(players[selectedPieceId].color, out Color playerColor))
-                {
-                    // Configurer l'outline
-                    outline.OutlineMode = Outline.Mode.OutlineAll;
-                    outline.OutlineColor = playerColor;
-                    outline.OutlineWidth = outlineTicketWidth; 
-                    outline.enabled = true;
-                    Debug.Log("PostItManager: Outline enabled for player " + selectedPieceId);
-                }
+                OutlinePostIt(taskId, players[selectedPieceId].color);
+            } else
+            {
+                Debug.LogError("PostItManager: PostIt with ID: " + taskId + " not found in activePostIts dictionary.");
             }
         }
         else
         {
             Debug.LogError("[PostItManager] ClientWebSocket instance not found!");
+        }
+    }
+    
+    public void OutlinePostIt(string taskId, string color)
+    {
+        if (activePostIts.ContainsKey(taskId))
+        {
+            GameObject postIt = activePostIts[taskId];
+            Outline outline = postIt.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = postIt.AddComponent<Outline>();
+            }
+
+            if (ColorUtility.TryParseHtmlString(color, out Color playerColor))
+            {
+                outline.OutlineMode = Outline.Mode.OutlineAll;
+                outline.OutlineColor = playerColor;
+                outline.OutlineWidth = outlineTicketWidth;
+                outline.enabled = true;
+                Debug.Log("PostItManager: PostIt with ID: " + taskId + " outlined successfully in color: " + color);
+            }
+            else
+            {
+                Debug.LogError("PostItManager: Invalid color format: " + color + " for player outline.");
+            }
         }
     }
 

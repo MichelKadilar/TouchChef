@@ -13,9 +13,9 @@ public class ClientWebSocket : MonoBehaviour
     public event Action<WebSocketTaskMessage> OnTaskMessageReceived;
     public event Action<WebSocketTaskTableMessage> OnTaskTableMessageReceived;
     public event Action<Product> OnProductMessageReceived;
-    public Player[] players;
+    public CookData[] players;
     public Task[] tasks;
-    public event Action<Player[]> OnPlayersUpdated;
+    public event Action<CookData[]> OnPlayersUpdated;
     public event Action<WebSocketTasksListMessage> OnTasksLiskUpdated;
     private bool isGameStarted = false;
 
@@ -34,7 +34,6 @@ public class ClientWebSocket : MonoBehaviour
         else
         {
             Destroy(gameObject);
-            return;
         }
     }
 
@@ -316,6 +315,18 @@ public class ClientWebSocket : MonoBehaviour
 
     private void HandleTaskMessage(WebSocketTaskMessage message)
     {
+        // Vérifier si le post-it existe dans le board
+        PostItManager postItManagerI = PostItManager.Instance;
+        if (postItManagerI != null)
+        {
+            // Si le post-it n'existe pas, le créer
+            if (!postItManagerI.activePostIts.ContainsKey(message.assignedTask.taskId))
+            {
+                postItManagerI.CreatePostIt(message.assignedTask.taskId, message.assignedTask.taskIcons);
+            }
+            postItManagerI.OutlinePostIt(message.assignedTask.taskId, message.assignedTask.cook.color);
+        }
+        
         // Attendre que le WorkstationManager soit disponible
         WorkstationManager manager = FindObjectOfType<WorkstationManager>();
         if (manager == null)

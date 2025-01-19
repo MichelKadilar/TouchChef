@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Serialization;
 
 [Serializable]
 public class WebSocketTaskMessage
@@ -44,6 +43,7 @@ public class AssignedTaskData
     public string taskId;
     public string quantity;
     public string workstation;
+    public string taskIcons;
     public CookData cook;
 }
 
@@ -98,7 +98,7 @@ public class WebSocketCooksListMessage
     public string type = "cooksList";
     public string from = "angular";
     public string to = "all";
-    public Player[] cooksList;
+    public CookData[] cooksList;
 }
 
 [Serializable]
@@ -111,15 +111,6 @@ public class WebSocketTasksListMessage
 }
 
 [Serializable]
-public class Player
-{
-    public string deviceId;
-    public string avatar;
-    public string color;
-    public string name;
-}
-
-[System.Serializable]
 public class Task
 {
     public string id;
