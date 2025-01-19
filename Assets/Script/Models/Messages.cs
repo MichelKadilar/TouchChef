@@ -67,7 +67,7 @@ public class TaskCompletionMessage
 {
     public string type = "taskComplete";
     public string from = "unity";
-    public string to = "angular";
+    public string to = "all";
     public TaskProgressData progressData;
 }
 
@@ -78,4 +78,13 @@ public class DeliveryScoreMessage
     public string from = "table";
     public string to = "angular";
     public string ingredientState;
+}
+
+[Serializable]
+public class UnactiveTaskMessage
+{
+    public string type;
+    public string from;
+    public string to;
+    public string taskID;
 }

@@ -175,7 +175,40 @@ public class WorkstationManager : MonoBehaviour
         };
         activeTasks[playerId] = progressData;
     }
-
+    
+    public void HandleUnactiveTaskBroadcast()
+    {
+        Debug.Log("WorkstationManager: Désactivation globale des tâches");
+    
+        // Créer une copie des clés pour éviter les problèmes de modification pendant l'itération
+        var playerIds = new List<string>(playerWorkstations.Keys);
+    
+        foreach (var playerId in playerIds)
+        {
+            ReleaseWorkstation(playerId);
+        }
+    
+        // Réinitialiser tous les highlights
+        if (allWorkstations != null)
+        {
+            foreach (var station in allWorkstations)
+            {
+                var highlight = station.GetComponent<WorkStationHighlight>();
+                if (highlight != null)
+                {
+                    highlight.SetHighlight(false);
+                }
+            }
+        }
+    
+        // Vider les dictionnaires de tracking
+        playerWorkstations.Clear();
+        workstationPlayers.Clear();
+        activeTasks.Clear();
+    
+        Debug.Log("WorkstationManager: Réinitialisation complète effectuée");
+    }
+    
     private WorkStation FindAvailableWorkstation(ProcessType type)
     {
         Debug.Log($"FindAvailableWorkstation: Recherche d'une station de type {type}");
@@ -279,7 +312,7 @@ public class WorkstationManager : MonoBehaviour
         if (playerWorkstations.TryGetValue(playerId, out WorkStation station))
         {
             Debug.Log($"Releasing station '{station.gameObject.name}' from player {playerId}");
-            
+        
             // Disable highlight
             var highlight = station.GetComponent<WorkStationHighlight>();
             if (highlight != null)
