@@ -2,9 +2,9 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
-using uPIe;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
+using uPIe;
 
 public class PostItManager : MonoBehaviour
 {

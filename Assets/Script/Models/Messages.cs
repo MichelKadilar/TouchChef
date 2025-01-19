@@ -83,7 +83,7 @@ public class TaskCompletionMessage
     public TaskProgressData progressData;
 }
 
-[System.Serializable]
+[Serializable]
 public class DeliveryScoreMessage
 {
     public string type = "updatescore";

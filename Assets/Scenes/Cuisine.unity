@@ -132,7 +132,6 @@ GameObject:
   m_Component:
   - component: {fileID: 39774821}
   - component: {fileID: 39774823}
-  - component: {fileID: 39774822}
   - component: {fileID: 39774824}
   m_Layer: 5
   m_Name: PostIt Menu
@@ -164,52 +163,6 @@ RectTransform:
   m_AnchoredPosition: {x: 757, y: 0}
   m_SizeDelta: {x: 222, y: 188}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &39774822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 39774820}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1471378983, guid: 2d7d74a2e00787042be8168217532959, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  canvas: {fileID: 0}
-  controlWithGamepad: 0
-  controllerDeadzone: 0.3
-  useCustomInputSystem: 0
-  confirmInputName: Fire1
-  horizontalInputName: Horizontal
-  verticalInputName: Vertical
-  indicatorGraphic: {fileID: 0}
-  applyIndicatorRotation: 1
-  startDegOffset: -45
-  menuOptionPrefab: {fileID: 980154393}
-  menuOptions:
-  - {fileID: 980154396}
-  - {fileID: 429334725}
-  - {fileID: 2086735056}
-  - {fileID: 2003181391}
-  selectedPieceId: -1
-  circleSize: 360
-  constrainIndicatorPosition: 1
-  keepSelectedOption: 0
-  defaultSelected: {fileID: 0}
-  deselectOptionIfOutsideBorders: 0
-  alignRadius: 92
-  alignRotation: 0
-  alignUpDirection: {x: 0, y: 1, z: 0}
-  alignForwardDirection: {x: 0, y: 0, z: 1}
-  DoDrawGizmos: 1
-  DrawOnlyOnSelected: 0
-  BoundaryLength: 1
-  DebugFoldout: 1
-  SetCircleSizeDirectly: 0
-  SelectedCircleSizeId: 0
-  ButtonsFoldout: 1
-  UseControllerDeadzoneSlider: 1
 --- !u!222 &39774823
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -227,7 +180,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 39774820}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cffe9c15488b46e8a6e8aa8358bc5de3, type: 3}
+  m_Script: {fileID: 11500000, guid: f7a33491225746e1bbb5fe35cb21729c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 0}
@@ -249,9 +202,9 @@ MonoBehaviour:
   selectedPieceId: -1
   circleSize: 360
   constrainIndicatorPosition: 1
-  keepSelectedOption: 0
+  keepSelectedOption: 1
   defaultSelected: {fileID: 0}
-  deselectOptionIfOutsideBorders: 1
+  deselectOptionIfOutsideBorders: 0
   alignRadius: 60
   alignRotation: 1
   alignUpDirection: {x: 0, y: 1, z: 0}
@@ -849,14 +802,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 282366613}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5c94dffbe63b4fe4be460148e240b99, type: 3}
+  m_Script: {fileID: 11500000, guid: 2fb7762f6d04b43f5baeba9a3f426562, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   postItPrefab: {fileID: 4274372548447600343, guid: 8c2f926d97bf34b70a7c4f261b33589d, type: 3}
   spawnPoints:
   - {fileID: 1062255289}
   - {fileID: 906914609}
-  - {fileID: 1000164069}
   - {fileID: 1000164069}
   - {fileID: 559105373}
   - {fileID: 118606026}
@@ -875,15 +827,15 @@ MonoBehaviour:
   colorPlayer4: {fileID: 150881052}
   avatarPlayer4: {fileID: 1936338111}
   avatars:
-  - {fileID: 21300000, guid: b3979b9cb10df49f9ad44d4ee6b78f2f, type: 3}
-  - {fileID: 21300000, guid: 9f6dccd04ff9542ecaaed4c7dd24d127, type: 3}
-  - {fileID: 21300000, guid: 4a207387db8e34259a0a36204164a399, type: 3}
-  - {fileID: 21300000, guid: 45a649e3e965d4c8e81eb47252953eb6, type: 3}
-  - {fileID: 21300000, guid: 4dc299c6da017434ba918459cc3e7994, type: 3}
-  - {fileID: 21300000, guid: 86bf41c0b12b04f839c26b8b4802cc0e, type: 3}
-  - {fileID: 21300000, guid: 9e044d38acb1449d28e2e5430ac5d62f, type: 3}
-  - {fileID: 21300000, guid: 30fea6e5c66664513b83823dead170e6, type: 3}
-  - {fileID: 21300000, guid: e1a3bd63e053d48198e9cf4c950958b7, type: 3}
+  - {fileID: 21300000, guid: 42592b4f092e44a2888efae2bfad5fc0, type: 3}
+  - {fileID: 21300000, guid: d6da4207ea6314b4c91676d310b4fdb0, type: 3}
+  - {fileID: 21300000, guid: 38627c14a9987457d8d7dd40fb3e4554, type: 3}
+  - {fileID: 21300000, guid: d83da668bc09c40ee9d9f795dd37adb3, type: 3}
+  - {fileID: 21300000, guid: bf2258c7aae6e4ceea84fc04a53ac91c, type: 3}
+  - {fileID: 21300000, guid: b7fa979db43494ebbaab3b8d7185f421, type: 3}
+  - {fileID: 21300000, guid: 27b3bd64119304b6fb859f1f71df55f9, type: 3}
+  - {fileID: 21300000, guid: a5b125f8f7cba4e55973140ae1c017da, type: 3}
+  - {fileID: 21300000, guid: f412892ad09ea4320a6e603594edef06, type: 3}
 --- !u!4 &282366615
 Transform:
   m_ObjectHideFlags: 0
@@ -1400,7 +1352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 119.391685, y: 0}
+  m_AnchoredPosition: {x: 129.3917, y: 0}
   m_SizeDelta: {x: 128, y: 128}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &429334724
@@ -2558,7 +2510,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000015258789, y: 119.391685}
+  m_AnchoredPosition: {x: -0.000015258789, y: 129.3917}
   m_SizeDelta: {x: 128, y: 128}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &980154395
@@ -6813,7 +6765,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -119.391716, y: 0}
+  m_AnchoredPosition: {x: -129.3917, y: 0}
   m_SizeDelta: {x: 128, y: 128}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &2003181390
@@ -7308,7 +7260,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000015258789, y: -119.391685}
+  m_AnchoredPosition: {x: -0.000015258789, y: -129.3917}
   m_SizeDelta: {x: 128, y: 128}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &2086735055

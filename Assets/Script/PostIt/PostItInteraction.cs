@@ -32,9 +32,11 @@ public class PostItInteraction : MonoBehaviour
             Vector2 mousePosition = Input.mousePosition;
             Vector2 menuPosition = playersMenu.transform.position;
             float distance = Vector2.Distance(mousePosition, menuPosition);
-            float threshold = 140f; // Distance seuil pour valider le clic
-            float minDistance = 20f; // Distance minimale pour éviter les clics accidentels et aussi pouvoir relacher au milieu
+            float threshold = 400f; // Distance seuil pour valider le clic
+            float minDistance = 55f; // Distance minimale pour éviter les clics accidentels et aussi pouvoir relacher au milieu
 
+            Debug.Log("Distance: " + distance);
+            
             if (distance < threshold && distance > minDistance && selectedPieceId != -1)
             {
                 var postItManager = FindObjectOfType<PostItManager>();
