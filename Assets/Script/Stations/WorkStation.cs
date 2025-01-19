@@ -17,6 +17,8 @@ public class WorkStation : MonoBehaviour
     [SerializeField] public GameObject availableVisual;
     [SerializeField] public GameObject processingVisual;
     [SerializeField] private GameObject invalidPlacementVisual;
+    [SerializeField] private GameObject fireEffect;
+    [SerializeField] private GameObject smokeEffect;
     
     [Header("Events")]
     public UnityEvent<float> OnProcessingProgress = new UnityEvent<float>();
@@ -275,6 +277,29 @@ public class WorkStation : MonoBehaviour
             processingVisual.SetActive(true);
             availableVisual?.SetActive(false);
         }
+        
+        // Activer l'effet de feu pendant la cuisson
+        if (fireEffect != null && isCookingStation)
+        {
+            fireEffect.SetActive(true);
+        }
+    }
+    
+    public void UpdateCookingEffects(IngredientState state)
+    {
+        if (!isCookingStation) return;
+
+        // Gérer le feu
+        if (fireEffect != null)
+        {
+            fireEffect.SetActive(state == IngredientState.Cut || state == IngredientState.Cooked || state == IngredientState.Burned);
+        }
+
+        // Gérer la fumée
+        if (smokeEffect != null)
+        {
+            smokeEffect.SetActive(state == IngredientState.Burned);
+        }
     }
 
     protected virtual void UpdateVisuals()
@@ -289,6 +314,12 @@ public class WorkStation : MonoBehaviour
         if (processingVisual != null)
         {
             processingVisual.SetActive(false);
+        }
+        
+        if (showAvailable)
+        {
+            if (fireEffect != null) fireEffect.SetActive(false);
+            if (smokeEffect != null) smokeEffect.SetActive(false);
         }
     }
 

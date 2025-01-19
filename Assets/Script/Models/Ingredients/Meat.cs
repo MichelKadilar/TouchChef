@@ -103,6 +103,8 @@ public class Meat : BaseIngredient, ISliceable
         {
             isProcessing = true;
             cookingTimer = 0f;
+            GetCurrentWorkStation()?.UpdateCookingEffects(currentState);
+            StartCoroutine(WaitForRemoval());
             
             if (cookingSound != null && audioSource != null)
             {
@@ -165,13 +167,14 @@ public class Meat : BaseIngredient, ISliceable
                     currentState = IngredientState.Cooked;
                     allowedProcesses.Clear();
                     isProcessing = false;
-                    StartCoroutine(WaitForRemoval());
+                    GetCurrentWorkStation()?.UpdateCookingEffects(currentState);
                 }
                 else if (cookingTimer >= burnTime && this.GetCurrentWorkStation()?.GetStationType() == ProcessType.Cook)
                 {
                     // L'état passe à Burned (le son de brûlure a déjà été joué)
                     currentState = IngredientState.Burned;
                     allowedProcesses.Clear();
+                    GetCurrentWorkStation()?.UpdateCookingEffects(currentState);
                 }
                 break;
             
@@ -182,16 +185,10 @@ public class Meat : BaseIngredient, ISliceable
 
     private IEnumerator WaitForRemoval()
     {
-        float timeoutDuration = 3f;
+        float timeoutDuration = 40f;
         float elapsedTime = 0f;
         WorkStation initialStation = GetCurrentWorkStation();
-        string originalPlayerId = initialStation?.GetAssignedPlayerId();
         bool hasBeenMoved = false;
-
-        if (string.IsNullOrEmpty(originalPlayerId))
-        {
-            yield break;
-        }
 
         while (elapsedTime < timeoutDuration)
         {
@@ -201,9 +198,11 @@ public class Meat : BaseIngredient, ISliceable
             {
                 hasBeenMoved = true;
                 StopCookingSound();  // Arrêter le son quand retiré de la station
+                initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
             }
             else if (hasBeenMoved && currentStation != initialStation)
             {
+                initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
                 StopCookingSound();  // Arrêter le son si déplacé vers une autre station
                 if (WorkstationManager.Instance != null)
                 {
@@ -223,6 +222,7 @@ public class Meat : BaseIngredient, ISliceable
             allowedProcesses.Clear();
             UpdateVisual();
         }
+        initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
     }
 
     private void StopCookingSound()
