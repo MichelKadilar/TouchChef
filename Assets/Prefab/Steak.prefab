@@ -127,7 +127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowedProcesses: 
-  processingTime: 3
+  processingTime: 31
   stateVisualContainer: {fileID: 0}
   rawVisual: {fileID: 919132149155446097, guid: 158aa02651ec29e46a570caf86750f5b, type: 3}
   cutVisual: {fileID: 7891238555950347608, guid: 4238823a9875a4ed799d5be6a2b6bff9, type: 3}
@@ -136,8 +136,9 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   cookingSound: {fileID: 8300000, guid: 32355dc844cdf6448aaf15be42148044, type: 3}
   burningSound: {fileID: 8300000, guid: eee3c173bc7e61a45a7d6c515286bf9d, type: 3}
+  burningVolume: 1
   neededSlices: 5
-  burnTime: 6
+  burnTime: 35
 --- !u!65 &5433130558923054661
 BoxCollider:
   m_ObjectHideFlags: 0

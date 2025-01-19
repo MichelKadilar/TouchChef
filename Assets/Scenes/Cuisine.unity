@@ -5335,6 +5335,8 @@ MonoBehaviour:
     prefab: {fileID: 7797463771621917780, guid: ec71fa45bf6ec4c25812730624d6dee6, type: 3}
   - id: 5
     prefab: {fileID: 8418327034278215596, guid: 671313d795e504cbeb660f44ba79108f, type: 3}
+  - id: 4
+    prefab: {fileID: 8175370266194693117, guid: 340659bfc87f94dd7b50458c9b8040fc, type: 3}
   conveyorBelts:
   - {fileID: 400751038}
   - {fileID: 2040961474}
