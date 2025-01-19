@@ -292,8 +292,9 @@ public class PostItManager : MonoBehaviour
         }
     }
     
-    public void removeOutline(string taskId)
+    public void RemoveOutline(string taskId)
     {
+        Debug.Log("PostItManager: Removing outline from post-it with ID: " + taskId);
         if (activePostIts.ContainsKey(taskId))
         {
             GameObject postIt = activePostIts[taskId];
@@ -305,8 +306,9 @@ public class PostItManager : MonoBehaviour
         }
     }
     
-    public void removePostIt(string taskId)
+    public void RemovePostIt(string taskId)
     {
+        Debug.Log("PostItManager: Removing post-it with ID: " + taskId);
         if (activePostIts.ContainsKey(taskId))
         {
             GameObject postIt = activePostIts[taskId];

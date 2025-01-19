@@ -162,7 +162,56 @@ public class ClientWebSocket : MonoBehaviour
             return;
         }
 
-        try 
+        try
+        {
+            if (message.Contains("taskFinished"))
+            {
+                var messageTask = JsonUtility.FromJson<WebSocketTaskMessage>(message);
+                if (messageTask.assignedTask != null)
+                {
+                    Debug.Log("ClientWebSocket: Tâche terminée reçue : " + message);
+                    postItManager = PostItManager.Instance;
+                    if (postItManager != null)
+                    {
+                        postItManager.RemovePostIt(messageTask.assignedTask.taskId);
+                    }
+                    HandleTaskMessage(messageTask);
+                }
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
+        try
+        {
+            // Vérifier d'abord si c'est un message unassign avec assignedTask
+            if (message.Contains("unactiveTask"))
+            {
+                var unactiveTaskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
+                if (unactiveTaskMessage.type == "unactiveTask" && unactiveTaskMessage.to == "all")
+                {
+                    Debug.Log($"ClientWebSocket: Message de désactivation de tâche reçu de {unactiveTaskMessage.from}");
+                    //HandleUnassignTask(unassignMessage);
+                    postItManager = PostItManager.Instance;
+                    if (postItManager != null)
+                    {
+                        postItManager.RemoveOutline(unactiveTaskMessage.assignedTask.taskId);
+                    }
+                    HandleTaskMessage(unactiveTaskMessage);
+                    return;
+                }
+            }
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
+        }
+        
+        try
         {
             // Vérifier d'abord si c'est un message unassign
             if (message.Contains("unactiveTask"))
@@ -172,10 +221,22 @@ public class ClientWebSocket : MonoBehaviour
                 {
                     Debug.Log($"ClientWebSocket: Message de désactivation de tâche reçu de {unassignMessage.from}");
                     HandleUnassignTask(unassignMessage);
+                    postItManager = PostItManager.Instance;
+                    
+                    if (postItManager != null)
+                        postItManager.RemoveOutline("1_" + unassignMessage.product.id);
+                    postItManager.RemovePostIt("1_" + unassignMessage.product.id);
                     return;
                 }
             }
-            
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
+        }
+
+        try
+        {
             // Ensuite essayer comme message de produit
             WebSocketMessage productMessage = JsonUtility.FromJson<WebSocketMessage>(message);
             if (productMessage.type == "add_product")
@@ -184,7 +245,14 @@ public class ClientWebSocket : MonoBehaviour
                 HandleProductMessage(productMessage);
                 return;
             }
-            
+        }
+        catch (Exception e)
+        {
+            Debug.Log("ClientWebSocket: Erreur de parsing de produit : " + e.Message);
+        }
+
+        try
+        {
             // Essayer comme message de tâche de table
             WebSocketTaskTableMessage tableMessage = JsonUtility.FromJson<WebSocketTaskTableMessage>(message);
             if (tableMessage.type == "table_task")
@@ -193,7 +261,14 @@ public class ClientWebSocket : MonoBehaviour
                 OnTaskTableMessageReceived?.Invoke(tableMessage);
                 return;
             }
-        
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing de table_task: {e.Message}");
+        }
+
+        try
+        {
             // Si ce n'est pas un produit, essayer comme message de tâche
             WebSocketTaskMessage taskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
             if (!string.IsNullOrEmpty(taskMessage.type))
@@ -204,7 +279,7 @@ public class ClientWebSocket : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError($"ClientWebSocket: Erreur de parsing: {e.Message}");
+            Debug.LogError($"ClientWebSocket: Erreur de parsing de task messages : {e.Message}");
         }
     }
     
@@ -354,16 +429,11 @@ public class ClientWebSocket : MonoBehaviour
             case "unactiveTask":
                 Debug.Log($"ClientWebSocket: Traitement d'une désactivation de tâche");
                 workstationManager.HandleUnactiveTask(message.from);
-                if (postItManager != null)
-                    postItManager.removeOutline(message.assignedTask.taskId);
-                    postItManager.removePostIt(message.assignedTask.taskId);
                 break;
             
             case "taskFinished":
                 Debug.Log($"ClientWebSocket: Traitement d'une tâche terminée");
                 workstationManager.HandleUnactiveTask(message.from);
-                if (postItManager != null)
-                    postItManager.removeOutline(message.assignedTask.taskId);
                 break;
         }
     }
