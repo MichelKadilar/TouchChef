@@ -956,7 +956,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allowedProcesses: 
-  processingTime: 3
+  processingTime: 31
   stateVisualContainer: {fileID: 7797463771621917780}
   rawVisual: {fileID: 4080939662897903716}
   cutVisual: {fileID: 4434910095710766952}
@@ -965,5 +965,6 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   cookingSound: {fileID: 8300000, guid: 32355dc844cdf6448aaf15be42148044, type: 3}
   burningSound: {fileID: 8300000, guid: eee3c173bc7e61a45a7d6c515286bf9d, type: 3}
+  burningVolume: 1
   neededSlices: 5
-  burnTime: 6
+  burnTime: 35

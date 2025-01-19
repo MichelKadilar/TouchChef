@@ -371,6 +371,7 @@ public class WorkstationManager : MonoBehaviour
             Debug.Log($"Tâche {taskData.taskId} terminée pour le joueur {playerId}");
             activeTasks.Remove(playerId);
             ReleaseWorkstation(playerId);
+            PostItManager.Instance?.RemovePostIt(taskData.taskId);
         }
     }
 

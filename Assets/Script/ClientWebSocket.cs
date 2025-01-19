@@ -11,12 +11,18 @@ public class ClientWebSocket : MonoBehaviour
 
     // Event pour les systèmes qui ont besoin d'être notifiés des messages
     public event Action<WebSocketTaskMessage> OnTaskMessageReceived;
+    public event Action<WebSocketTaskTableMessage> OnTaskTableMessageReceived;
     public event Action<Product> OnProductMessageReceived;
+    public CookData[] players;
+    public Task[] tasks;
+    public event Action<CookData[]> OnPlayersUpdated;
+    public event Action<WebSocketTasksListMessage> OnTasksLiskUpdated;
     private bool isGameStarted = false;
 
     private WebSocket _websocket;
     private WorkstationManager workstationManager;
     private ConveyorSystem conveyorSystem;
+    private PostItManager postItManager;
 
     void Awake()
     {
@@ -28,7 +34,6 @@ public class ClientWebSocket : MonoBehaviour
         else
         {
             Destroy(gameObject);
-            return;
         }
     }
 
@@ -103,81 +108,197 @@ public class ClientWebSocket : MonoBehaviour
     }
 
     private void HandleWebSocketMessage(byte[] bytes)
-{
-    string message = System.Text.Encoding.UTF8.GetString(bytes);
-    if (message.Contains("heartrate")) 
     {
-        return;
-    }
-    Debug.Log($"ClientWebSocket: Message reçu: {message}");
-
-    if (message.Contains("startGame")) 
-    {
-        if (isGameStarted)
+        string message = System.Text.Encoding.UTF8.GetString(bytes);
+        if (message.Contains("heartrate"))
         {
-            Debug.Log("ClientWebSocket: Ignorer la commande de démarrage - jeu déjà en cours");
+            return;
+        }
+        
+        Debug.Log($"ClientWebSocket: Message reçu: {message}");
+        if (message.Contains("startGame"))
+        {
+            // Vérifier si on est déjà sur la scène Cuisine
+            if (SceneManager.GetActiveScene().name == "Cuisine")
+            {
+                Debug.Log("ClientWebSocket: Déjà sur la scène Cuisine, pas besoin de recharger");
+                return;
+            }
+            
+            // Ignorer le message si le jeu est déjà démarré
+            if (isGameStarted)
+            {
+                Debug.Log("ClientWebSocket: Ignorer la commande de démarrage - jeu déjà en cours");
+                return;
+            }
+
+            Debug.Log("ClientWebSocket: Commande de démarrage du jeu reçue");
+            isGameStarted = true;
+            StartCoroutine(LoadGameScene());
             return;
         }
 
-        Debug.Log("ClientWebSocket: Commande de démarrage du jeu reçue");
-        isGameStarted = true;
-        StartCoroutine(LoadGameScene());
-        return;
-    }
-
-    try 
-    {
-        // Vérifier d'abord si c'est un message unassign
-        if (message.Contains("unactiveTask"))
+        if (message.Contains("cooksList"))
         {
-            var unassignMessage = JsonUtility.FromJson<WebSocketMessage>(message);
-            if (unassignMessage.type == "unactiveTask" && unassignMessage.to == "all")
+            Debug.Log("ClientWebSocket: Liste de cuisiniers reçue");
+            var cooksList = JsonUtility.FromJson<WebSocketCooksListMessage>(message);
+            if (cooksList.cooksList != null)
             {
-                Debug.Log($"ClientWebSocket: Message de désactivation de tâche reçu de {unassignMessage.from}");
-                HandleUnassignTask(unassignMessage);
+                players = cooksList.cooksList;
+                OnPlayersUpdated?.Invoke(players);
+            }
+            return;
+        }
+        
+        if (message.Contains("tasksList"))
+        {
+            var tasksList = JsonUtility.FromJson<WebSocketTasksListMessage>(message);
+            if (tasksList.tasks != null)
+            {
+                Debug.Log("ClientWebSocket: Liste de tâches reçue - Nombre: " + tasksList.tasks.Length);
+                tasks = tasksList.tasks;
+                OnTasksLiskUpdated?.Invoke(tasksList);
+            }
+            return;
+        }
+
+        try
+        {
+            if (message.Contains("taskFinished"))
+            {
+                var messageTask = JsonUtility.FromJson<WebSocketTaskMessage>(message);
+                if (messageTask.assignedTask != null)
+                {
+                    Debug.Log("ClientWebSocket: Tâche terminée reçue : " + message);
+                    postItManager = PostItManager.Instance;
+                    if (postItManager != null)
+                    {
+                        postItManager.RemovePostIt(messageTask.assignedTask.taskId);
+                    }
+                    HandleTaskMessage(messageTask);
+                }
                 return;
             }
         }
-
-        // Ensuite vérifier si c'est un message de produit
-        WebSocketMessage productMessage = JsonUtility.FromJson<WebSocketMessage>(message);
-        if (productMessage.type == "add_product")
+        catch (Exception e)
         {
-            Debug.Log("ClientWebSocket: Message de produit détecté");
-            HandleProductMessage(productMessage);
+            Console.WriteLine(e);
+            throw;
+        }
+        
+        try
+        {
+            // Vérifier d'abord si c'est un message unassign avec assignedTask
+            if (message.Contains("unactiveTask"))
+            {
+                var unactiveTaskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
+                if (unactiveTaskMessage.type == "unactiveTask" && unactiveTaskMessage.to == "all")
+                {
+                    Debug.Log($"ClientWebSocket: Message de désactivation de tâche reçu de {unactiveTaskMessage.from}");
+                    //HandleUnassignTask(unassignMessage);
+                    postItManager = PostItManager.Instance;
+                    if (postItManager != null)
+                    {
+                        postItManager.RemoveOutline(unactiveTaskMessage.assignedTask.taskId);
+                    }
+                    HandleTaskMessage(unactiveTaskMessage);
+                    return;
+                }
+            }
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
+        }
+        
+        try
+        {
+            // Vérifier d'abord si c'est un message unassign
+            if (message.Contains("unactiveTask"))
+            {
+                var unassignMessage = JsonUtility.FromJson<WebSocketMessage>(message);
+                if (unassignMessage.type == "unactiveTask" && unassignMessage.to == "all")
+                {
+                    Debug.Log($"ClientWebSocket: Message de désactivation de tâche reçu de {unassignMessage.from}");
+                    HandleUnassignTask(unassignMessage);
+                    postItManager = PostItManager.Instance;
+                    
+                    if (postItManager != null)
+                        postItManager.RemoveOutline("1_" + unassignMessage.product.id);
+                    postItManager.RemovePostIt("1_" + unassignMessage.product.id);
+                    return;
+                }
+            }
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
+        }
+
+        try
+        {
+            // Ensuite essayer comme message de produit
+            WebSocketMessage productMessage = JsonUtility.FromJson<WebSocketMessage>(message);
+            if (productMessage.type == "add_product")
+            {
+                Debug.Log("ClientWebSocket: Message de produit détecté");
+                HandleProductMessage(productMessage);
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("ClientWebSocket: Erreur de parsing de produit : " + e.Message);
+        }
+
+        try
+        {
+            // Essayer comme message de tâche de table
+            WebSocketTaskTableMessage tableMessage = JsonUtility.FromJson<WebSocketTaskTableMessage>(message);
+            if (tableMessage.type == "table_task")
+            {
+                Debug.Log($"ClientWebSocket: Message post-it détecté");
+                OnTaskTableMessageReceived?.Invoke(tableMessage);
+                return;
+            }
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing de table_task: {e.Message}");
+        }
+
+        try
+        {
+            // Si ce n'est pas un produit, essayer comme message de tâche
+            WebSocketTaskMessage taskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
+            if (!string.IsNullOrEmpty(taskMessage.type))
+            {
+                Debug.Log($"ClientWebSocket: Message de tâche détecté - Type: {taskMessage.type}");
+                HandleTaskMessage(taskMessage);
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing de task messages : {e.Message}");
+        }
+    }
+    
+    private void HandleUnassignTask(WebSocketMessage message)
+    {
+        Debug.Log($"Traitement du unassignTask: {JsonUtility.ToJson(message)}");
+    
+        if (workstationManager == null)
+        {
+            Debug.LogError("WorkstationManager manquant!");
             return;
         }
-    
-        // Si ce n'est pas un produit, essayer comme message de tâche
-        WebSocketTaskMessage taskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
-        if (!string.IsNullOrEmpty(taskMessage.type))
+
+        if (message.from == "angular")
         {
-            Debug.Log($"ClientWebSocket: Message de tâche détecté - Type: {taskMessage.type}");
-            HandleTaskMessage(taskMessage);
+            // Si le message vient d'Angular, on notifie le WorkstationManager
+            workstationManager.HandleUnactiveTaskBroadcast();
         }
     }
-    catch (Exception e)
-    {
-        Debug.LogError($"ClientWebSocket: Erreur de parsing: {e.Message}");
-    }
-}
-
-private void HandleUnassignTask(WebSocketMessage message)
-{
-    Debug.Log($"Traitement du unassignTask: {JsonUtility.ToJson(message)}");
-    
-    if (workstationManager == null)
-    {
-        Debug.LogError("WorkstationManager manquant!");
-        return;
-    }
-
-    if (message.from == "angular")
-    {
-        // Si le message vient d'Angular, on notifie le WorkstationManager
-        workstationManager.HandleUnactiveTaskBroadcast();
-    }
-}
     
     private IEnumerator LoadGameScene()
     {
@@ -269,6 +390,18 @@ private void HandleUnassignTask(WebSocketMessage message)
 
     private void HandleTaskMessage(WebSocketTaskMessage message)
     {
+        // Si c'est un addTask alors l'ajouter au PostItManager
+        PostItManager postItManagerI = PostItManager.Instance;
+        if (postItManagerI != null && message.type == "addTask")
+        {
+            // Si le post-it n'existe pas, le créer
+            if (!postItManagerI.activePostIts.ContainsKey(message.assignedTask.taskId))
+            {
+                postItManagerI.CreatePostIt(message.assignedTask.taskId, message.assignedTask.taskIcons);
+            }
+            postItManagerI.OutlinePostIt(message.assignedTask.taskId, message.assignedTask.cook.color);
+        }
+        
         // Attendre que le WorkstationManager soit disponible
         WorkstationManager manager = FindObjectOfType<WorkstationManager>();
         if (manager == null)
@@ -295,6 +428,11 @@ private void HandleUnassignTask(WebSocketMessage message)
 
             case "unactiveTask":
                 Debug.Log($"ClientWebSocket: Traitement d'une désactivation de tâche");
+                workstationManager.HandleUnactiveTask(message.from);
+                break;
+            
+            case "taskFinished":
+                Debug.Log($"ClientWebSocket: Traitement d'une tâche terminée");
                 workstationManager.HandleUnactiveTask(message.from);
                 break;
         }
