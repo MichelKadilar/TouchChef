@@ -8,6 +8,11 @@ public class SliceDetector : MonoBehaviour
     [SerializeField] private float raycastDistance = 100f;
     [SerializeField] private float multiTouchDelay = 0.5f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip sliceSound;
+    [SerializeField] private float sliceVolume = 1f;
+
     [Header("Debug")]
     [SerializeField] private bool debugMode = true;
 
@@ -22,6 +27,13 @@ public class SliceDetector : MonoBehaviour
         if (mainCamera == null)
         {
             Debug.LogError("SliceDetector: Main Camera not found!");
+        }
+
+        // Initialize audio source if not set
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
         }
     }
 
@@ -119,7 +131,15 @@ public class SliceDetector : MonoBehaviour
                 ingredient.GetCurrentWorkStation()?.GetStationType() == ProcessType.Cut)
             {
                 if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
+                
+                // Slice the ingredient
                 sliceableIngredient.Slice();
+                
+                // Play slicing sound
+                if (audioSource != null && sliceSound != null)
+                {
+                    audioSource.PlayOneShot(sliceSound, sliceVolume);
+                }
             }
         }
     }
