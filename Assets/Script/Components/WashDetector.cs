@@ -35,6 +35,17 @@ public class WashDetector : MonoBehaviour
 
     private void Update()
     {
+        // Mettre à jour la référence de la caméra si nécessaire
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogWarning("WashDetector: Waiting for camera...");
+                return;
+            }
+        }
+
         HandleWashInput();
     }
 
@@ -69,6 +80,12 @@ public class WashDetector : MonoBehaviour
 
     private void TryStartWash(Vector2 position)
     {
+        if (mainCamera == null)
+        {
+            Debug.LogWarning("WashDetector: Camera not available for wash operation");
+            return;
+        }
+
         if (debugMode) Debug.Log("Tentative de lavage à la position: " + position);
         
         Ray ray = mainCamera.ScreenPointToRay(position);
