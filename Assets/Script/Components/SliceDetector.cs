@@ -19,7 +19,6 @@ public class SliceDetector : MonoBehaviour
 
     private Camera mainCamera;
     
-    // Structure pour stocker l'état de chaque workstation
     private class WorkstationState
     {
         public bool isSlicing = false;
@@ -29,8 +28,8 @@ public class SliceDetector : MonoBehaviour
         public BaseIngredient currentIngredient = null;
     }
     
-    // Dictionnaire pour suivre l'état de chaque workstation
     private Dictionary<WorkStation, WorkstationState> workstationStates = new Dictionary<WorkStation, WorkstationState>();
+    private Dictionary<int, WorkStation> activeTouches = new Dictionary<int, WorkStation>(); // Pour suivre quelle touche contrôle quelle workstation
 
     private void Awake()
     {
@@ -62,9 +61,13 @@ public class SliceDetector : MonoBehaviour
     {
         if (Touchscreen.current != null)
         {
+            // Créer une liste des touches actives actuelles
+            HashSet<int> currentTouches = new HashSet<int>();
+            
             foreach (var touch in Touchscreen.current.touches)
             {
                 int touchId = touch.touchId.ReadValue();
+                currentTouches.Add(touchId);
                 var phase = touch.phase.ReadValue();
                 Vector2 position = touch.position.ReadValue();
 
@@ -76,15 +79,34 @@ public class SliceDetector : MonoBehaviour
 
                     case UnityEngine.InputSystem.TouchPhase.Ended:
                     case UnityEngine.InputSystem.TouchPhase.Canceled:
-                        ReleaseTouch(touchId);
+                        if (activeTouches.TryGetValue(touchId, out WorkStation workStation))
+                        {
+                            if (workstationStates.TryGetValue(workStation, out WorkstationState state))
+                            {
+                                ResetWorkstationState(state);
+                            }
+                            activeTouches.Remove(touchId);
+                        }
                         break;
                 }
             }
 
-            // Reset les workstations si aucun toucher n'est actif
-            if (Touchscreen.current.touches.Count == 0)
+            // Nettoyer les touches qui ne sont plus actives
+            List<int> touchesToRemove = new List<int>();
+            foreach (var touch in activeTouches)
             {
-                ResetAllWorkstations();
+                if (!currentTouches.Contains(touch.Key))
+                {
+                    if (workstationStates.TryGetValue(touch.Value, out WorkstationState state))
+                    {
+                        ResetWorkstationState(state);
+                    }
+                    touchesToRemove.Add(touch.Key);
+                }
+            }
+            foreach (int touchId in touchesToRemove)
+            {
+                activeTouches.Remove(touchId);
             }
         }
         else if (Mouse.current != null)
@@ -95,7 +117,14 @@ public class SliceDetector : MonoBehaviour
             }
             else if (Mouse.current.rightButton.wasReleasedThisFrame)
             {
-                ReleaseTouch(0);
+                if (activeTouches.TryGetValue(0, out WorkStation workStation))
+                {
+                    if (workstationStates.TryGetValue(workStation, out WorkstationState state))
+                    {
+                        ResetWorkstationState(state);
+                    }
+                    activeTouches.Remove(0);
+                }
             }
         }
     }
@@ -131,16 +160,17 @@ public class SliceDetector : MonoBehaviour
                 WorkStation workStation = ingredient.GetCurrentWorkStation();
                 if (workStation != null && workStation.GetStationType() == ProcessType.Cut)
                 {
-                    // Obtenir ou créer l'état de la workstation
+                    // Créer ou obtenir l'état de la workstation
                     if (!workstationStates.ContainsKey(workStation))
                     {
                         workstationStates[workStation] = new WorkstationState();
                     }
-                    
                     WorkstationState state = workstationStates[workStation];
 
-                    // Vérifier si cette workstation accepte un nouveau toucher
-                    if (state.activeTouch == null && state.canSlice && CheckTimeBetweenSlices(state))
+                    // Vérifier que la workstation n'est pas déjà contrôlée par une autre touche
+                    if ((state.activeTouch == null || state.activeTouch == touchId) && 
+                        state.canSlice && 
+                        CheckTimeBetweenSlices(state))
                     {
                         // Si c'est un nouvel ingrédient, réinitialiser son état
                         if (state.currentIngredient != ingredient)
@@ -152,6 +182,7 @@ public class SliceDetector : MonoBehaviour
                         state.isSlicing = true;
                         state.canSlice = false;
                         state.activeTouch = touchId;
+                        activeTouches[touchId] = workStation;
 
                         if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name} on workstation");
                         
@@ -170,17 +201,6 @@ public class SliceDetector : MonoBehaviour
         }
     }
 
-    private void ReleaseTouch(int touchId)
-    {
-        foreach (var kvp in workstationStates)
-        {
-            if (kvp.Value.activeTouch == touchId)
-            {
-                ResetWorkstationState(kvp.Value);
-            }
-        }
-    }
-
     private void ResetWorkstationState(WorkstationState state)
     {
         state.isSlicing = false;
@@ -188,16 +208,9 @@ public class SliceDetector : MonoBehaviour
         state.activeTouch = null;
     }
 
-    private void ResetAllWorkstations()
-    {
-        foreach (var state in workstationStates.Values)
-        {
-            ResetWorkstationState(state);
-        }
-    }
-
     private void OnDisable()
     {
         workstationStates.Clear();
+        activeTouches.Clear();
     }
 }
