@@ -21,6 +21,7 @@ public class Meat : BaseIngredient, ISliceable
 
     private Slider _slider;
     private bool isCooking = false;
+    private bool hasBeenCooked = false; // Track if meat has ever reached cooked state
 
     [Header("Slice Options")]
     public int neededSlices = 5;
@@ -77,7 +78,6 @@ public class Meat : BaseIngredient, ISliceable
         
         base.Awake();
         UpdateVisual();
-        Debug.Log($"CURRENT STATE MEAT : {currentState}");
     }
 
     public void Slice()
@@ -103,7 +103,9 @@ public class Meat : BaseIngredient, ISliceable
         {
             isProcessing = true;
             cookingTimer = 0f;
-            GetCurrentWorkStation()?.UpdateCookingEffects(currentState);
+            hasBeenCooked = false; // Reset the cooked flag at start
+            // Démarrer avec l'effet de feu pour la viande crue
+            GetCurrentWorkStation()?.UpdateCookingEffects(IngredientState.Cut);
             StartCoroutine(WaitForRemoval());
             
             if (cookingSound != null && audioSource != null)
@@ -121,7 +123,10 @@ public class Meat : BaseIngredient, ISliceable
                 
                 if (cookingTimer >= processingTime && currentState != IngredientState.Cooked)
                 {
+                    hasBeenCooked = true; // Mark that meat has reached cooked state
                     CompleteProcessing(ProcessType.Cook);
+                    // Mettre à jour l'effet de feu pour l'état cuit
+                    GetCurrentWorkStation()?.UpdateCookingEffects(IngredientState.Cooked);
                 }
                 else if (cookingTimer >= burnTime && currentState != IngredientState.Burned)
                 {
@@ -136,8 +141,6 @@ public class Meat : BaseIngredient, ISliceable
                     if (burningSound != null && burningAudioSource != null)
                     {
                         burningAudioSource.PlayOneShot(burningSound, burningVolume);
-                        
-                        // Attendre un peu que le son démarre
                         yield return new WaitForSeconds(0.1f);
                     }
                     
@@ -177,8 +180,6 @@ public class Meat : BaseIngredient, ISliceable
                     GetCurrentWorkStation()?.UpdateCookingEffects(currentState);
                 }
                 break;
-            
-            // Les autres cas restent inchangés...
         }
         UpdateVisual();
     }
@@ -197,14 +198,14 @@ public class Meat : BaseIngredient, ISliceable
             if (currentStation == null)
             {
                 hasBeenMoved = true;
-                StopCookingSound();  // Arrêter le son quand retiré de la station
-                initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
+                StopCookingSound();
+                initialStation?.UpdateCookingEffects(IngredientState.Raw);
             }
             else if (hasBeenMoved && currentStation != initialStation)
             {
-                initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
-                StopCookingSound();  // Arrêter le son si déplacé vers une autre station
-                if (WorkstationManager.Instance != null)
+                initialStation?.UpdateCookingEffects(IngredientState.Raw);
+                StopCookingSound();
+                if (WorkstationManager.Instance != null && hasBeenCooked && currentState != IngredientState.Burned)
                 {
                     WorkstationManager.Instance.UpdateTaskProgress(initialStation, "cook");
                 }
@@ -222,7 +223,7 @@ public class Meat : BaseIngredient, ISliceable
             allowedProcesses.Clear();
             UpdateVisual();
         }
-        initialStation.UpdateCookingEffects(IngredientState.Raw); // Pour stopper les effets de feux
+        initialStation?.UpdateCookingEffects(IngredientState.Raw);
     }
 
     private void StopCookingSound()
@@ -232,9 +233,6 @@ public class Meat : BaseIngredient, ISliceable
             audioSource.Stop();
             isCooking = false;
         }
-
-        // Si le son de brûlure jouait, il s’agit d’un PlayOneShot, donc rien à stopper spécifiquement
-        // (PlayOneShot ne se base pas sur un clip actif, c’est un son lancé ponctuellement)
     }
 
     private void OnDestroy()
