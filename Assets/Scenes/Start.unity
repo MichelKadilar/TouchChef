@@ -163,6 +163,9 @@ MonoBehaviour:
     m_Bits: 8
   raycastDistance: 100
   multiTouchDelay: 0.5
+  audioSource: {fileID: 0}
+  sliceSound: {fileID: 8300000, guid: ada83bdc85c0c0c45962b05b66f97aa4, type: 3}
+  sliceVolume: 1
   debugMode: 1
 --- !u!114 &518617362
 MonoBehaviour:
@@ -238,6 +241,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f451fab1e6d94aea8fb73803e281bb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  players: []
+  tasks: []
 --- !u!114 &518617367
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,6 +392,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f451fab1e6d94aea8fb73803e281bb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  players: []
+  tasks: []
 --- !u!4 &944355430
 Transform:
   m_ObjectHideFlags: 0
