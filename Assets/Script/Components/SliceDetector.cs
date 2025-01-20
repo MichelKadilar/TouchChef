@@ -6,7 +6,7 @@ public class SliceDetector : MonoBehaviour
     [Header("Slice Configuration")]
     [SerializeField] private LayerMask ingredientLayer;
     [SerializeField] private float raycastDistance = 100f;
-    [SerializeField] private float multiTouchDelay = 0.5f;
+    [SerializeField] private float minTimeBetweenSlices = 0.2f;
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -17,9 +17,11 @@ public class SliceDetector : MonoBehaviour
     [SerializeField] private bool debugMode = true;
 
     private Camera mainCamera;
-    private bool wasRightMousePressed = false;
-    private float lastTouchTime;
-    private int touchCount;
+    private bool isSlicing = false;
+    private bool canSlice = true;
+    private float lastSliceTime = 0f;
+    private int? activeTouch = null;
+    private BaseIngredient currentIngredient = null;
 
     private void Awake()
     {
@@ -29,7 +31,6 @@ public class SliceDetector : MonoBehaviour
             Debug.LogError("SliceDetector: Main Camera not found!");
         }
 
-        // Initialize audio source if not set
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -39,82 +40,81 @@ public class SliceDetector : MonoBehaviour
 
     private void Update()
     {
-        // Mettre à jour la référence de la caméra si nécessaire
         if (mainCamera == null)
         {
             mainCamera = Camera.main;
             if (mainCamera == null) return;
         }
 
-        // Handle mouse input for slicing
-        if (Mouse.current != null)
-        {
-            bool isRightMousePressed = Mouse.current.rightButton.isPressed;
-            
-            // Detect right mouse button press
-            if (isRightMousePressed && !wasRightMousePressed)
-            {
-                Vector2 mousePosition = Mouse.current.position.ReadValue();
-                HandleSliceAtPosition(mousePosition);
-            }
-            
-            wasRightMousePressed = isRightMousePressed;
-        }
+        HandleSliceInput();
+    }
 
-        // Handle touch input for slicing
+    private void HandleSliceInput()
+    {
         if (Touchscreen.current != null)
         {
-            HandleTouchSlicing();
-        }
-    }
-
-    private void HandleTouchSlicing()
-    {
-        var touches = Touchscreen.current.touches;
-        int currentTouchCount = 0;
-
-        // Count active touches
-        foreach (var touch in touches)
-        {
-            if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+            foreach (var touch in Touchscreen.current.touches)
             {
-                currentTouchCount++;
-            }
-        }
+                int touchId = touch.touchId.ReadValue();
+                var phase = touch.phase.ReadValue();
 
-        // Check for multi-touch within the time window
-        if (currentTouchCount > 0)
-        {
-            float currentTime = Time.time;
-            if (currentTime - lastTouchTime <= multiTouchDelay)
-            {
-                touchCount += currentTouchCount;
-                if (touchCount >= 2)
+                switch (phase)
                 {
-                    // Get the position of the last touch for slicing
-                    foreach (var touch in touches)
-                    {
-                        if (touch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+                    case UnityEngine.InputSystem.TouchPhase.Began when activeTouch == null:
+                        activeTouch = touchId;
+                        if (canSlice && CheckTimeBetweenSlices())
                         {
-                            Vector2 touchPosition = touch.position.ReadValue();
-                            HandleSliceAtPosition(touchPosition);
-                            break;
+                            TryStartSlice(touch.position.ReadValue());
                         }
-                    }
-                    touchCount = 0;
+                        break;
+
+                    case UnityEngine.InputSystem.TouchPhase.Ended:
+                    case UnityEngine.InputSystem.TouchPhase.Canceled:
+                        if (touchId == activeTouch)
+                        {
+                            ResetSliceState();
+                            activeTouch = null;
+                        }
+                        break;
                 }
             }
-            else
+
+            // Si aucun toucher n'est actif, réinitialiser l'état
+            if (Touchscreen.current.touches.Count == 0)
             {
-                touchCount = currentTouchCount;
+                ResetSliceState();
+                activeTouch = null;
             }
-            lastTouchTime = currentTime;
+        }
+        else if (Mouse.current != null)
+        {
+            if (Mouse.current.rightButton.wasPressedThisFrame && 
+                canSlice && 
+                CheckTimeBetweenSlices())
+            {
+                TryStartSlice(Mouse.current.position.ReadValue());
+            }
+            else if (Mouse.current.rightButton.wasReleasedThisFrame)
+            {
+                ResetSliceState();
+            }
         }
     }
 
-    private void HandleSliceAtPosition(Vector2 position)
+    private bool CheckTimeBetweenSlices()
     {
-        if (mainCamera == null) return;
+        float currentTime = Time.time;
+        if (currentTime - lastSliceTime >= minTimeBetweenSlices)
+        {
+            lastSliceTime = currentTime;
+            return true;
+        }
+        return false;
+    }
+
+    private void TryStartSlice(Vector2 position)
+    {
+        if (mainCamera == null || isSlicing) return;
 
         Ray ray = mainCamera.ScreenPointToRay(position);
         RaycastHit[] hits = Physics.SphereCastAll(ray, 1.5f, raycastDistance, ingredientLayer);
@@ -130,17 +130,47 @@ public class SliceDetector : MonoBehaviour
                 ingredient is ISliceable sliceableIngredient && 
                 ingredient.GetCurrentWorkStation()?.GetStationType() == ProcessType.Cut)
             {
+                // Si c'est un nouvel ingrédient, réinitialiser complètement l'état
+                if (currentIngredient != ingredient)
+                {
+                    CompleteReset();
+                    currentIngredient = ingredient;
+                }
+
+                isSlicing = true;
+                canSlice = false;
+
                 if (debugMode) Debug.Log($"Slicing ingredient: {clickedObject.name}");
                 
-                // Slice the ingredient
-                sliceableIngredient.Slice();
-                
-                // Play slicing sound
-                if (audioSource != null && sliceSound != null)
+                if (ingredient.CurrentState != IngredientState.Cut)
                 {
-                    audioSource.PlayOneShot(sliceSound, sliceVolume);
+                    sliceableIngredient.Slice();
+                    
+                    if (audioSource != null && sliceSound != null)
+                    {
+                        audioSource.PlayOneShot(sliceSound, sliceVolume);
+                    }
                 }
             }
         }
+    }
+
+    private void ResetSliceState()
+    {
+        isSlicing = false;
+        canSlice = true;
+    }
+
+    private void CompleteReset()
+    {
+        ResetSliceState();
+        activeTouch = null;
+        lastSliceTime = 0f;
+        currentIngredient = null;
+    }
+
+    private void OnDisable()
+    {
+        CompleteReset();
     }
 }
