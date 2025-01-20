@@ -189,7 +189,7 @@ public class ClientWebSocket : MonoBehaviour
         try
         {
             // Vérifier d'abord si c'est un message unassign avec assignedTask
-            if (message.Contains("unactiveTask"))
+            if (message.Contains("unactiveTask") && message.Contains("assignedTask"))
             {
                 var unactiveTaskMessage = JsonUtility.FromJson<WebSocketTaskMessage>(message);
                 if (unactiveTaskMessage.type == "unactiveTask" && unactiveTaskMessage.to == "all")
@@ -211,10 +211,39 @@ public class ClientWebSocket : MonoBehaviour
             Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
         }
         
+        
         try
         {
-            // Vérifier d'abord si c'est un message unassign
-            if (message.Contains("unactiveTask"))
+            // Vérifier si c'est un message unassign
+            if (message.Contains("unactiveTask") && message.Contains("taskID"))
+            {
+                var unassignMessage = JsonUtility.FromJson<WebUnactiveSocketMessage>(message);
+                if (unassignMessage.type == "unactiveTask" && unassignMessage.to == "all")
+                {
+                    Debug.Log($"ClientWebSocket: Message de désasigner de tâche "+unassignMessage.taskID +"reçu de {unassignMessage.from}");
+                    postItManager = PostItManager.Instance;
+                    
+                    if (postItManager != null)
+                        postItManager.RemoveOutline(unassignMessage.taskID);
+                    
+                    if (unassignMessage.from == "angular")
+                    {
+                        // Si le message vient d'Angular, on notifie le WorkstationManager
+                        workstationManager.HandleUnactiveTaskBroadcast();
+                    }
+                    return;
+                }
+            }
+        } 
+        catch (Exception e)
+        {
+            Debug.LogError($"ClientWebSocket: Erreur de parsing with unactiveTask: {e.Message}");
+        }
+        
+        try
+        {
+            // Vérifier si c'est un message unassign
+            if (message.Contains("unactiveTask") && message.Contains("product"))
             {
                 var unassignMessage = JsonUtility.FromJson<WebSocketMessage>(message);
                 if (unassignMessage.type == "unactiveTask" && unassignMessage.to == "all")

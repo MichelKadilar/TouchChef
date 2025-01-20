@@ -30,6 +30,15 @@ public class WebSocketMessage
 }
 
 [Serializable]
+public class WebUnactiveSocketMessage
+{
+    public string type;
+    public string from;
+    public string to;
+    public string taskID;
+}
+
+[Serializable]
 public class WebSocketProduct
 {
     public int id;
